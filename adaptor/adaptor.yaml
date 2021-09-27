@@ -1,0 +1,115 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: adaptor
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-event-mappings
+  namespace: adaptor
+data:
+  redis-url: redis-master.redis.svc.cluster.local
+  service-emits-event.properties: |
+    order.order.validate=order.validated.1:order.invalid.1
+    order.order.create=order.created.1
+    order.order.ship=order.shipped.1
+    order.order.received=order.received.1
+    order.order.cancelled=order.closed.1
+
+  event-consumedby-service.properties: |
+    order.submitted.1=order.order.validate
+    order.validated.1=order.order.create
+    order.validated.1=order.order-write.store
+    order.created.1=order.order.fulfil
+    order.created.1=order.order-write.store
+    order.ship.1=order.order.ship
+    order.ship.1=order.order-write.store
+    order.receive.1=order.order.receive
+    order.receive.1=order.order-write.store
+    order.shipped.1=order.order.complete
+    order.shipped.1=order.order-write.store
+    order.cancelled.1=order.order.cancel
+    order.cancelled.1=order.order-write.store
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adaptor
+  namespace: adaptor
+  labels:
+    app: adaptor
+    type: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: adaptor
+  template:
+    metadata:
+      labels:
+        app: adaptor
+    spec:
+      volumes:
+        - name: registry
+          configMap:
+            name: service-event-mappings
+            items:
+              - key: "service-emits-event.properties"
+                path: "service-emits-event.properties"
+              - key: "event-consumedby-service.properties"
+                path: "event-consumedby-service.properties"
+      containers:
+        - name: adaptor
+          image: bryandollery/redis-rest-adaptor
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: registry
+              mountPath: "/registry"
+              readOnly: true
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis
+                  key: password
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: service-event-mappings
+                  key: redis-url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adaptor
+  namespace: adaptor
+spec:
+  type: ClusterIP
+  selector:
+    app: adaptor
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adaptor
+  namespace: adaptor
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /adaptor(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: adaptor
+                port:
+                  number: 80

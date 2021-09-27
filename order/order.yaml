@@ -1,0 +1,42 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: order
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order 
+  namespace: order
+  labels:
+    app: order
+    type: api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+      - name: order
+        image: bryandollery/redis-rest-order
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+  namespace: order
+spec:
+  type: ClusterIP
+  selector:
+    app: order
+  ports:
+    - port: 80
+      targetPort: 80
