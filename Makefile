@@ -1,25 +1,27 @@
-.PHONY: default kcycle kup kdown redis adaptor acycle up
+.PHONY:  cycle _cycle up down platform default
 
-default: kup
+default: up platform
 
-up: kup redis adaptor
+cycle: _cycle platform
 
-kcycle:
-	@make -C cluster cycle
-	@make -C ingress up
+_cycle:
+	@make -C infra/cluster cycle
 
-kup:
-	@make -C cluster up
-	@make -C ingress up
+up:
+	@make -C infra/cluster up
 
-kdown:
-	@make -C cluster down
+down:
+	@make -C infra/cluster down
 
-redis: 
-	@make -C redis up
+platform:
+	@make -C platform/context install
+	@make -C platform/ingress install
+	@make -C platform/redis install
+	@make -C platform/adaptor install
 
-acycle: 
-	@make -C adaptor cycle
+api:
+	@make -C api/context install
+	@make -C api/orders install
 
-adaptor:
-	@make -C adaptor adaptor
+services:
+	@make -C services install
