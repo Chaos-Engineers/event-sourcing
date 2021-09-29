@@ -1,0 +1,105 @@
+Date : 2021-09-29 17:48:14
+Directory : /home/bryan/git/codification/event-sourcing
+Total : 49 files,  1670 codes, 20 comments, 156 blanks, all 1846 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| YAML       |          9 |      1,000 |         20 |         10 |      1,030 |
+| JavaScript |          5 |        271 |          0 |         51 |        322 |
+| Make       |         14 |        177 |          0 |         76 |        253 |
+| JSON       |          5 |        108 |          0 |          3 |        111 |
+| html       |          1 |         40 |          0 |          4 |         44 |
+| docker     |          7 |         39 |          0 |         10 |         49 |
+| Properties |          2 |         18 |          0 |          0 |         18 |
+| css        |          1 |         12 |          0 |          2 |         14 |
+| Ignore     |          4 |          4 |          0 |          0 |          4 |
+| SVG        |          1 |          1 |          0 |          0 |          1 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                      | files      | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                         |         49 |      1,670 |         20 |        156 |      1,846 |
+| api                                                                                                       |         10 |        236 |          0 |         38 |        274 |
+| api/context                                                                                               |          2 |          8 |          0 |          2 |         10 |
+| api/orders                                                                                                |          8 |        228 |          0 |         36 |        264 |
+| api/orders/db                                                                                             |          1 |          6 |          0 |          2 |          8 |
+| api/orders/src                                                                                            |          1 |         76 |          0 |         13 |         89 |
+| infra                                                                                                     |          2 |         45 |          1 |          7 |         53 |
+| infra/cluster                                                                                             |          2 |         45 |          1 |          7 |         53 |
+| platform                                                                                                  |         15 |        911 |         19 |         42 |        972 |
+| platform/adaptor                                                                                          |          9 |        245 |          0 |         29 |        274 |
+| platform/adaptor/registry                                                                                 |          2 |         18 |          0 |          0 |         18 |
+| platform/adaptor/src                                                                                      |          1 |         89 |          0 |         17 |        106 |
+| platform/context                                                                                          |          2 |          9 |          0 |          2 |         11 |
+| platform/ingress                                                                                          |          2 |        641 |         19 |          5 |        665 |
+| platform/redis                                                                                            |          1 |          6 |          0 |          5 |         11 |
+| services                                                                                                  |         10 |        152 |          0 |         31 |        183 |
+| services/orders                                                                                           |         10 |        152 |          0 |         31 |        183 |
+| services/orders/context                                                                                   |          2 |          8 |          0 |          2 |         10 |
+| services/orders/order                                                                                     |          7 |        137 |          0 |         26 |        163 |
+| services/orders/order/src                                                                                 |          1 |         53 |          0 |         14 |         67 |
+| ui                                                                                                        |         11 |        307 |          0 |         29 |        336 |
+| ui/ifs-ui                                                                                                 |         11 |        307 |          0 |         29 |        336 |
+| ui/ifs-ui/public                                                                                          |          2 |         65 |          0 |          5 |         70 |
+| ui/ifs-ui/src                                                                                             |          4 |         66 |          0 |          9 |         75 |
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                                  | language   | code       | comment    | blank      | total      |
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /home/bryan/git/codification/event-sourcing/Makefile                                                      | Make       |         19 |          0 |          9 |         28 |
+| /home/bryan/git/codification/event-sourcing/api/context/Makefile                                          | Make       |          4 |          0 |          1 |          5 |
+| /home/bryan/git/codification/event-sourcing/api/context/api.yaml                                          | YAML       |          4 |          0 |          1 |          5 |
+| /home/bryan/git/codification/event-sourcing/api/orders/.dockerignore                                      | Ignore     |          1 |          0 |          0 |          1 |
+| /home/bryan/git/codification/event-sourcing/api/orders/Dockerfile                                         | docker     |          6 |          0 |          2 |          8 |
+| /home/bryan/git/codification/event-sourcing/api/orders/Dockerfile_dev                                     | docker     |          5 |          0 |          1 |          6 |
+| /home/bryan/git/codification/event-sourcing/api/orders/Makefile                                           | Make       |         35 |          0 |         17 |         52 |
+| /home/bryan/git/codification/event-sourcing/api/orders/db/Makefile                                        | Make       |          6 |          0 |          2 |          8 |
+| /home/bryan/git/codification/event-sourcing/api/orders/orders.yaml                                        | YAML       |         81 |          0 |          1 |         82 |
+| /home/bryan/git/codification/event-sourcing/api/orders/package.json                                       | JSON       |         18 |          0 |          0 |         18 |
+| /home/bryan/git/codification/event-sourcing/api/orders/src/index.js                                       | JavaScript |         76 |          0 |         13 |         89 |
+| /home/bryan/git/codification/event-sourcing/infra/cluster/Makefile                                        | Make       |          8 |          0 |          6 |         14 |
+| /home/bryan/git/codification/event-sourcing/infra/cluster/k3d-config.yaml                                 | YAML       |         37 |          1 |          1 |         39 |
+| /home/bryan/git/codification/event-sourcing/platform/Makefile                                             | Make       |         10 |          0 |          1 |         11 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/.dockerignore                                | Ignore     |          1 |          0 |          0 |          1 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/Dockerfile                                   | docker     |          6 |          0 |          1 |          7 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/Dockerfile_dev                               | docker     |          5 |          0 |          1 |          6 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/Makefile                                     | Make       |         23 |          0 |          9 |         32 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/adaptor.yaml                                 | YAML       |         84 |          0 |          1 |         85 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/package.json                                 | JSON       |         19 |          0 |          0 |         19 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/registry/event-consumedby-service.properties | Properties |         13 |          0 |          0 |         13 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/registry/service-emits-event.properties      | Properties |          5 |          0 |          0 |          5 |
+| /home/bryan/git/codification/event-sourcing/platform/adaptor/src/index.js                                 | JavaScript |         89 |          0 |         17 |        106 |
+| /home/bryan/git/codification/event-sourcing/platform/context/Makefile                                     | Make       |          5 |          0 |          1 |          6 |
+| /home/bryan/git/codification/event-sourcing/platform/context/platform.yaml                                | YAML       |          4 |          0 |          1 |          5 |
+| /home/bryan/git/codification/event-sourcing/platform/ingress/Makefile                                     | Make       |          7 |          0 |          3 |         10 |
+| /home/bryan/git/codification/event-sourcing/platform/ingress/nginx.yaml                                   | YAML       |        634 |         19 |          2 |        655 |
+| /home/bryan/git/codification/event-sourcing/platform/redis/Makefile                                       | Make       |          6 |          0 |          5 |         11 |
+| /home/bryan/git/codification/event-sourcing/services/orders/Makefile                                      | Make       |          7 |          0 |          3 |         10 |
+| /home/bryan/git/codification/event-sourcing/services/orders/context/Makefile                              | Make       |          4 |          0 |          1 |          5 |
+| /home/bryan/git/codification/event-sourcing/services/orders/context/orders.yaml                           | YAML       |          4 |          0 |          1 |          5 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/.dockerignore                           | Ignore     |          1 |          0 |          0 |          1 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/Dockerfile                              | docker     |          6 |          0 |          2 |          8 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/Dockerfile_dev                          | docker     |          5 |          0 |          1 |          6 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/Makefile                                | Make       |         19 |          0 |          7 |         26 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/order.yaml                              | YAML       |         37 |          0 |          1 |         38 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/package.json                            | JSON       |         16 |          0 |          1 |         17 |
+| /home/bryan/git/codification/event-sourcing/services/orders/order/src/index.js                            | JavaScript |         53 |          0 |         14 |         67 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/.dockerignore                                       | Ignore     |          1 |          0 |          0 |          1 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/Dockerfile                                          | docker     |          6 |          0 |          2 |          8 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/Makefile                                            | Make       |         24 |          0 |         11 |         35 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/adaptor.yaml                                        | YAML       |        115 |          0 |          1 |        116 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/package.json                                        | JSON       |         30 |          0 |          1 |         31 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/public/index.html                                   | html       |         40 |          0 |          4 |         44 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/public/manifest.json                                | JSON       |         25 |          0 |          1 |         26 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/src/Orders.jsx                                      | JavaScript |         42 |          0 |          6 |         48 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/src/index.css                                       | css        |         12 |          0 |          2 |         14 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/src/index.js                                        | JavaScript |         11 |          0 |          1 |         12 |
+| /home/bryan/git/codification/event-sourcing/ui/ifs-ui/src/logo.svg                                        | SVG        |          1 |          0 |          0 |          1 |
+| Total                                                                                                     |            |      1,670 |         20 |        156 |      1,846 |
++-----------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

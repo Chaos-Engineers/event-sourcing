@@ -1,0 +1,51 @@
+.PHONY: cycle install dev run build release redis-secret deploy delete logs
+
+cycle: delete install
+install: build release install_db redis-secret db-secret deploy
+
+dev:
+	@docker build -t bryandollery/ordersapi -f Dockerfile_dev .
+
+run:
+	@docker run -it --rm -p 8080:80 bryandollery/ordersapi
+
+
+build:
+	@echo "\033[0;32mBuilding orders API\033[0m"
+	@docker build -t bryandollery/ordersapi .
+
+release:
+	@echo "\033[0;32mReleasing orders API\033[0m"
+	@docker push bryandollery/ordersapi
+
+redis-secret:
+	@echo "\033[0;32mStoring redis creds\033[0m"
+	@kubectl create secret generic redis-password -n api --from-literal=password=$$(kubectl get secret --namespace platform redis -o jsonpath="{.data.redis-password}" | base64 --decode)
+
+db-secret:
+	@echo "\033[0;32mStoring db creds\033[0m"
+	@kubectl create secret generic db-password -n api --from-literal=password=$$(kubectl get secret --namespace api db-mongodb -o jsonpath="{.data.mongodb-root-password}" | base64 --decode)
+
+install_db:
+	@make -C db install
+
+deploy-all: deploy-orders deploy-db
+
+deploy-orders:
+	@echo "\033[0;32mDeploying orders API\033[0m"
+	@kubectl apply -f orders.yaml
+	@echo "\033[0;32mWaiting for orders API pod to be ready\033[0m"
+
+deploy-db:
+	@kubectl wait $$(kubectl get pods -o name -n api | grep -i orders) --for=condition=ready --timeout=30s -n api
+
+delete-all: delete-orders delete-db
+
+delete-orders:
+	@kubectl delete -f orders.yaml
+
+delete-db:
+	@make -C db delete
+
+logs:
+	kubectl logs -n api $$(kubectl get pods -n api -o name | grep -i orders | head -n 1 | cut -d'/' -f2)
