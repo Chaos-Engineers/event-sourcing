@@ -1,16 +1,20 @@
-console.log("Adaptor Starting");
-
 const fs = require("fs");
 const got = require("got");
 const { v4: uuid } = require("uuid");
 const Redis = require("ioredis");
 const brokerType = require("redis-streams-broker").StreamChannelBroker;
+const pino = require("pino");
+
+const log = pino({ level: process.env.LOG_LEVEL || "info", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
+
+log.info("Adaptor Starting");
+
 const eventServiceMap = {};
 let consumerGroup = null;
 let subscriptionHandle = null;
 
 const readAndProcessEventMappings = () => {
-    console.log(`Adaptor reading properties`);
+    log.debug(`Adaptor reading properties`);
     const eventServiceEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-service-event"), "utf8");
     eventServiceEventRaw.split("\n").forEach(line => {
         if (line.indexOf("|") === -1) return;
@@ -23,7 +27,8 @@ const readAndProcessEventMappings = () => {
 };
 
 const joinAndSubscribe = async() => {
-    console.log(`Adaptor connecting to redis`);
+    log.debug(`Adaptor connecting to redis`);
+
     const redisClient = new Redis({
         port: 6379,
         host: process.env.REDIS_URL,
@@ -50,7 +55,7 @@ const joinAndSubscribe = async() => {
                 const { body: result, statusCode } = await got.post(mapping.url, { json: { payload: payload } });
 
                 if (statusCode < 200 || statusCode >= 299) {
-                    console.log(`Error sending event to ${mapping.url} : Response ${statusCode}`);
+                    log.debug(`Error sending event to ${mapping.url} : Response ${statusCode}`);
                 } else if (statusCode === 200 || statusCode === 201) {
                     const eventType = serviceEmits[mapping.fqn];
                     const id = uuid();
@@ -72,22 +77,22 @@ const joinAndSubscribe = async() => {
 
             await element.markAsRead();
         } catch (err) {
-            console.error(err);
+            log.error(err);
         }
     };
 
-    console.info(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`);
+    log.info(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`);
     consumerGroup = await broker.joinConsumerGroup(consumerGroupName);
-    console.log(`Adaptor subscribing as ${adaptorName}`);
+    log.debug(`Adaptor subscribing as ${adaptorName}`);
     subscriptionHandle = await consumerGroup.subscribe(adaptorName, handleEvent, pollSpan, payloadsToFetch, readPending);
-    console.log(`Adaptor ready`);
+    log.debug(`Adaptor ready`);
 };
 
 readAndProcessEventMappings();
 joinAndSubscribe();
 
 process.on("SIGTERM", () => {
-    console.info(`SIGTERM signal received in adaptor: ${adaptorName}`);
+    log.info(`SIGTERM signal received in adaptor: ${adaptorName}`);
     if (consumerGroup && subscriptionHandle) consumerGroup.unsubscribe(subscriptionHandle);
     process.exit(0);
 });

@@ -1,9 +1,28 @@
-console.log("Order Service starting")
-const express = require("express");
 const { v4: uuid } = require("uuid");
+const express = require("express");
+const pino = require("pino");
+const expressPino = require("express-pino-logger");
+const { StatusCodes } = require("http-status-codes");
 
 const app = express();
 app.use(express.json());
+
+const log = pino({ level: process.env.LOG_LEVEL || "info", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
+log.info("Order Service starting");
+
+const expressLogger = expressPino({ logger: log });
+app.use(expressLogger);
+app.disable("x-powered-by");
+
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", "POST");
+
+    if (req.method === "OPTIONS") return res.status(StatusCodes.OK).json({});
+
+    next();
+});
 
 const validateOrder = order => {
     const errors = [];
@@ -28,12 +47,12 @@ const validateOrder = order => {
 
 app.post("/validate", (req, res) => {
     const errors = validateOrder(req.body);
-    if (errors.length === 0) return res.status(200).send(req.body);
-    return res.status(400).send(errors);
+    if (errors.length === 0) return res.status(StatusCodes.OK).send(req.body);
+    return res.status(StatusCodes.BAD_REQUEST).send(errors);
 });
 
 app.post("/create", (req, res) => {
-    if (errors.length === 0) return res.send({...req.body, orderId: uuid(), status: "new" });
+    return res.send({...req.body, orderId: uuid(), status: "new" });
 });
 
 app.post("/fulfil", (req, res) => {
@@ -56,7 +75,7 @@ app.post("/receive", (req, res) => {
 app.post("/cancel", (req, res) => {
     const order = req.body;
     if (order.consignments.ship > 0) {
-        res.status(400).send({...order, status: "aborting cancellation", notes: "Cannot cancel as part of order has been shipped" });
+        res.status(StatusCodes.CONFLICT).send({...order, status: "aborting cancellation", notes: "Cannot cancel as part of order has been shipped" });
     }
     return res.send({...req.body, status: "cancelled" });
 });
@@ -65,4 +84,4 @@ app.post("/approve", (req, res) => {
     return res.send({...req.body, status: "approved" });
 });
 
-app.listen(process.env.ORDER_PORT);
+app.listen(80);

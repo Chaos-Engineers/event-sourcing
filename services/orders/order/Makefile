@@ -20,7 +20,10 @@ release:
 deploy:
 	@kubectl apply -f order.yaml
 	@echo "\033[0;32mWaiting for order pod to be ready\033[0m"
-	@kubectl wait $$(kubectl get pods -o name -n contexts-order | grep order) --for=condition=ready --timeout=30s -n contexts-order
+	@kubectl wait $$(kubectl get pods -o name -n contexts-orders | grep order) --for=condition=ready --timeout=30s -n contexts-orders
 
 delete:
 	@kubectl delete -f order.yaml
+
+logs:
+	@kubectl logs -n contexts-orders $$(kubectl get pods -n contexts-orders | grep order | head -n 1 | cut -d' '  -f1) | jq
