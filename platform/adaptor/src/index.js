@@ -5,7 +5,7 @@ const Redis = require("ioredis");
 const brokerType = require("redis-streams-broker").StreamChannelBroker;
 const pino = require("pino");
 
-const log = pino({ level: process.env.LOG_LEVEL || "info", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
+const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
 
 log.info("Adaptor Starting");
 
@@ -15,15 +15,18 @@ let subscriptionHandle = null;
 
 const readAndProcessEventMappings = () => {
     log.debug(`Adaptor reading properties`);
+
     const eventServiceEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-service-event"), "utf8");
     eventServiceEventRaw.split("\n").forEach(line => {
         if (line.indexOf("|") === -1) return;
         const [input, svc, output] = line.split("|");
         const [namespace, service, endpoint] = svc.split(".");
-        const fqn = `${service}.${namespace}/${endpoint}`;
+        const src = `${service}.${namespace}/${endpoint || ""}`;
+        const source = src.endsWith("/") ? src.substring(0, src.length - 1) : src;
         if (!eventServiceMap.hasOwnProperty(input)) eventServiceMap[input] = [];
-        eventServiceMap[input].push({ fqn, url: `http://${service}.${namespace}.svc.cluster.local/${endpoint}`, output });
+        eventServiceMap[input].push({ source, url: `http://${service}.${namespace}.svc.cluster.local/${endpoint || ""}`, output });
     });
+    log.debug({ routes: eventServiceMap });
 };
 
 const joinAndSubscribe = async() => {
@@ -56,14 +59,13 @@ const joinAndSubscribe = async() => {
 
                 if (statusCode < 200 || statusCode >= 299) {
                     log.debug(`Error sending event to ${mapping.url} : Response ${statusCode}`);
-                } else if (statusCode === 200 || statusCode === 201) {
-                    const eventType = serviceEmits[mapping.fqn];
+                } else if (statusCode === 200 || (statusCode === 201 && mapping.output !== "-")) {
                     const id = uuid();
 
                     const event = {
                         id: id,
-                        source: mapping.fqn,
-                        type: eventType,
+                        source: mapping.source,
+                        type: mapping.output,
                         ctx: payload.ctx || id,
                         time: Date.now(),
                         data: {...result },

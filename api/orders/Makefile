@@ -1,6 +1,6 @@
 .PHONY: cycle install dev run build release redis-secret deploy delete logs
 
-cycle: delete install
+cycle: delete-orders build release deploy-orders
 install: build release install_db redis-secret db-secret deploy
 
 dev:

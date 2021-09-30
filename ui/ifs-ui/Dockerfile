@@ -5,6 +5,6 @@ run npm i
 run npm i -g serve
 copy public/ /work/public/
 copy src/ /work/src/
-run npm start build
+run npm run build
 cmd ["serve","-s","build"]
 

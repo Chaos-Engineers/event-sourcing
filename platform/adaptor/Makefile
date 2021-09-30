@@ -1,11 +1,11 @@
 .PHONY: install cycle delete adaptor build release deploy redis-secret
-install: adaptor
-cycle: delete install
+
+install: build release redis-secret deploy
+
+cycle: delete build release deploy logs
 
 build-dev:
 	@docker build -t bryandollery/redis-rest-adaptor -f Dockerfile_dev .
-
-adaptor: build release redis-secret deploy
 
 build:
 	@echo "\033[0;32mBuilding adaptor\033[0m"
@@ -29,3 +29,6 @@ deploy:
 
 delete:
 	@kubectl delete -f adaptor.yaml
+
+logs:
+	@kubectl logs -n platform $$(kubectl get pods -n platform | grep adaptor | head -n 1 | cut -d' '  -f1) | jq

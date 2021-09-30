@@ -34,7 +34,7 @@ const validateOrder = order => {
         errors.push("Customer is required");
     }
 
-    if (!order.email) {
+    if (!order.username) {
         errors.push("Email is required");
     }
 
@@ -62,7 +62,12 @@ app.post("/fulfil", (req, res) => {
 
 app.post("/ship", (req, res) => {
     const order = req.body;
-    if (order.consignments.shipped < order.consignments.count) return {...order, status: "shipping", consignments: {...consignments, ship: order.consignments.ship + 1 } };
+    if (order.consignments.shipped < order.consignments.count)
+        return {
+            ...order,
+            status: "shipping",
+            consignments: {...consignments, ship: order.consignments.ship + 1 }
+        };
     return res.send({...order, status: `shipped`, shipConsignment: -1 });
 });
 

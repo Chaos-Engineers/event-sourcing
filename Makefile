@@ -1,4 +1,4 @@
-.PHONY:  cycle _cycle up down platform default
+.PHONY:  cycle _cycle up down platform default services api ui
 
 default: up platform
 
@@ -19,9 +19,14 @@ platform:
 	@make -C platform/redis install
 	@make -C platform/adaptor install
 
+services:
+	@make -C services/orders install
+
 api:
 	@make -C api/context install
 	@make -C api/orders install
 
-services:
-	@make -C services install
+ui:
+	@make -C ui/context install
+	@make -C ui/ifs-ui install
+	

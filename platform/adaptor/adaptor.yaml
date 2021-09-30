@@ -2,15 +2,17 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: service-event-mappings
+  name: config
   namespace: platform
 data:
   redis-url: redis-master.platform.svc.cluster.local
   event-service-event: |
-    order.submitted.1|contexts-orders.order.validate|order.validated.1
+    order.submitted.1|contexts-orders.order.validate|order.validated.1|order.invalid.1
     order.validated.1|contexts-orders.order.create|order.created.1
+    order.validated.1|api.order|-
     order.created.1|contexts-orders.order.authorise|order.authorised.1
     order.authorised.1|contexts-orders.order.fulfil|order.ship.1
+    order.authorised.1|api.order|-
     order.ship.1|contexts-orders.order.ship|order.shipped.1
     order.received.1|contexts-orders.order.received|order.close.1
     order.cancelled.1|contexts-orders.order.cancel|order.cancelled.1
@@ -36,9 +38,9 @@ spec:
       volumes:
         - name: registry
           configMap:
-            name: service-event-mappings
+            name: config
             items:
-              - key: "event-service-event"
+              - key: event-service-event
                 path: "event-service-event"
       containers:
         - name: adaptor
@@ -58,7 +60,7 @@ spec:
             - name: REDIS_URL
               valueFrom:
                 configMapKeyRef:
-                  name: service-event-mappings
+                  name: config
                   key: redis-url
 ---
 apiVersion: v1

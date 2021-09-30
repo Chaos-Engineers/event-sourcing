@@ -1,12 +1,4 @@
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: config
-  namespace: ui
-data:
-  mongo: db-mongodb.api.svc.cluster.local
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -30,22 +22,6 @@ spec:
         image: bryandollery/ifsui
         ports:
         - containerPort: 80
-        env:
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-password
-              key: password
-        - name: MONGO_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-password
-              key: password
-        - name: MONGO
-          valueFrom:
-            configMapKeyRef:
-              name: config
-              key: mongo
 ---
 apiVersion: v1
 kind: Service

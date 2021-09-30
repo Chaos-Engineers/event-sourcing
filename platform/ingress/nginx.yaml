@@ -285,6 +285,11 @@ spec:
       nodePort: 30001
       protocol: TCP
       targetPort: https
+    - name: mongo
+      port: 27017
+      nodePort: 30002
+      protocol: TCP
+      targetPort: 27017
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/instance: ingress-nginx

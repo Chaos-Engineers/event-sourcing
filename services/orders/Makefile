@@ -1,10 +1,10 @@
 .PHONY: install delete cycle
 
-install:
-	@make -C context install
-	@make -C orders install
-
 cycle: delete install
 
+install:
+	@make -C context install
+	@make -C order install
+
 delete:
-	@kubectl -C context delete
+	@make -C context delete
