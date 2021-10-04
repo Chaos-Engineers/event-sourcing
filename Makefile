@@ -24,7 +24,7 @@ services:
 
 api:
 	@make -C api/context install
-	@make -C api/orders install
+	@make -C api/orders-bc install
 
 ui:
 	@make -C ui/context install

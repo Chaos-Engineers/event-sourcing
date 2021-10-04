@@ -19,13 +19,16 @@ const readAndProcessEventMappings = () => {
     const eventServiceEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-service-event"), "utf8");
     eventServiceEventRaw.split("\n").forEach(line => {
         if (line.indexOf("|") === -1) return;
-        const [input, svc, output] = line.split("|");
-        const [namespace, service, endpoint] = svc.split(".");
+        const [input, svc, output, error] = line.split("|");
+        const [_namespace, service, endpoint] = svc.split(".");
+        let namespace = _namespace;
+        if (_namespace.startsWith("+")) namespace = _namespace.substring(1);
         const src = `${service}.${namespace}/${endpoint || ""}`;
         const source = src.endsWith("/") ? src.substring(0, src.length - 1) : src;
         if (!eventServiceMap.hasOwnProperty(input)) eventServiceMap[input] = [];
-        eventServiceMap[input].push({ source, url: `http://${service}.${namespace}.svc.cluster.local/${endpoint || ""}`, output });
+        eventServiceMap[input].push({ source, url: `http://${service}.${namespace}.svc.cluster.local/${endpoint || ""}`, output, put: _namespace.startsWith("+"), error: error });
     });
+
     log.debug({ routes: eventServiceMap });
 };
 
@@ -55,11 +58,15 @@ const joinAndSubscribe = async() => {
             let prevResult = null;
 
             for (const mapping of eventServiceMap[payload.type]) {
-                const { body: result, statusCode } = await got.post(mapping.url, { json: { payload: payload } });
+                const { body: result, statusCode } = mapping.put ? await got.put(mapping.url, { json: { payload } }) : await got.post(mapping.url, { json: { payload: payload } });
 
                 if (statusCode < 200 || statusCode >= 299) {
-                    log.debug(`Error sending event to ${mapping.url} : Response ${statusCode}`);
-                } else if (statusCode === 200 || (statusCode === 201 && mapping.output !== "-")) {
+                    if (mapping.error) {
+                        await got.post(mapping.error, { json: { payload, result, statusCode } });
+                    } else {
+                        log.error(`Unhandled Error sending event to ${mapping.url} : Response ${statusCode}`);
+                    }
+                } else if ((statusCode === 200 || statusCode === 201) && mapping.output !== "-") {
                     const id = uuid();
 
                     const event = {

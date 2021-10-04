@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useFetch from "react-fetch-hook";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+const url = "http://localhost:30000/orders";
 
 const Orders = () => {
   const [panel, setPanel] = useState("main");
@@ -63,11 +64,8 @@ const NewOrderPanel = ({ setPanel }) => {
       items: itms
     };
 
-    await fetch("http://localhost:30000/orders", {
+    await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify(newOrder)
     });
 
@@ -124,7 +122,7 @@ const NewOrderPanel = ({ setPanel }) => {
                 ?
               </span>
             </label>
-            <input type="text" value={currency} onChange={e => setCurrency(e.target.value)} placeholder="$" className="form-control" name="currency"  maxLength="4" id="currency" title="Enter the currency of the price shown above" />
+            <input type="text" value={currency} onChange={e => setCurrency(e.target.value)} placeholder="$" className="form-control" name="currency" maxLength="4" id="currency" title="Enter the currency of the price shown above" />
           </div>
           <div className="formbuilder-date form-group field-date">
             <label htmlFor="date" className="formbuilder-date-label">
@@ -151,37 +149,37 @@ const NewOrderPanel = ({ setPanel }) => {
             <div className="checkbox-group">
               <div className="formbuilder-checkbox">
                 <label htmlFor="items-0" className="kc-toggle">
-                  <input name="items[]" checked={items[0]} onChange={() => setItems(i => [...i.splice(0, 1, !i[0])])} id="items-0"  type="checkbox" />
+                  <input name="items[]" checked={items[0]} onChange={() => setItems(i => [...i.splice(0, 1, !i[0])])} id="items-0" type="checkbox" />
                   <span></span>Pens
                 </label>
               </div>
               <div className="formbuilder-checkbox">
                 <label htmlFor="items-1" className="kc-toggle">
-                  <input name="items[]" checked={items[1]} onChange={() => setItems(i => [...i.splice(1, 1, !i[1])])} id="items-1"  type="checkbox" />
+                  <input name="items[]" checked={items[1]} onChange={() => setItems(i => [...i.splice(1, 1, !i[1])])} id="items-1" type="checkbox" />
                   <span></span>Paper
                 </label>
               </div>
               <div className="formbuilder-checkbox">
                 <label htmlFor="items-2" className="kc-toggle">
-                  <input name="items[]" checked={items[2]} onChange={() => setItems(i => [...i.splice(2, 1, !i[2])])} id="items-2"  type="checkbox" />
+                  <input name="items[]" checked={items[2]} onChange={() => setItems(i => [...i.splice(2, 1, !i[2])])} id="items-2" type="checkbox" />
                   <span></span>Eraser
                 </label>
               </div>
               <div className="formbuilder-checkbox">
                 <label htmlFor="items-3" className="kc-toggle">
-                  <input name="items[]" checked={items[3]} onChange={() => setItems(i => [...i.splice(3, 1, !i[3])])} id="items-3"  type="checkbox" />
+                  <input name="items[]" checked={items[3]} onChange={() => setItems(i => [...i.splice(3, 1, !i[3])])} id="items-3" type="checkbox" />
                   <span></span>Pencils
                 </label>
               </div>
               <div className="formbuilder-checkbox">
                 <label htmlFor="items-4" className="kc-toggle">
-                  <input name="items[]" checked={items[4]} onChange={() => setItems(i => [...i.splice(4, 1, !i[4])])} id="items-4"  type="checkbox" />
+                  <input name="items[]" checked={items[4]} onChange={() => setItems(i => [...i.splice(4, 1, !i[4])])} id="items-4" type="checkbox" />
                   <span></span>Sharpener
                 </label>
               </div>
               <div className="formbuilder-checkbox">
                 <label htmlFor="items-5" className="kc-toggle">
-                  <input name="items[]" checked={items[5]} onChange={() => setItems(i => [...i.splice(5, 1, !i[5])])} id="items-5"  type="checkbox" />
+                  <input name="items[]" checked={items[5]} onChange={() => setItems(i => [...i.splice(5, 1, !i[5])])} id="items-5" type="checkbox" />
                   <span></span>Paper Clips
                 </label>
               </div>
@@ -202,7 +200,7 @@ const NewOrderPanel = ({ setPanel }) => {
 };
 
 const MainPanel = ({ setPanel }) => {
-  const orders = useFetch("http://localhost:30000/orders");
+  const orders = useFetch(url);
 
   const handleNewOrder = () => {
     setPanel("new");
