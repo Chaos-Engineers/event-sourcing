@@ -3,18 +3,26 @@ const { MongoClient } = require("mongodb");
 const Redis = require("ioredis");
 const brokerType = require("redis-streams-broker").StreamChannelBroker;
 const express = require("express");
-const pino = require("pino");
-const expressPino = require("express-pino-logger");
+// const pino = require("pino");
+// const expressPino = require("express-pino-logger");
 const { StatusCodes: sc } = require("http-status-codes");
 
 const app = express();
 app.use(express.json());
-const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
+// const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
+
+const log = {
+    log: console.log,
+    debug: console.debug,
+    info: console.info,
+    warn: console.warn,
+    error: console.error
+};
 
 log.info("Order API Starting");
 
-const expressLogger = expressPino({ logger: log });
-app.use(expressLogger);
+// const expressLogger = expressPino({ logger: log });
+// app.use(expressLogger);
 app.disable("x-powered-by");
 
 let broker = null;
@@ -36,7 +44,7 @@ app.use((req, res, next) => {
 
 app.get("/", async(req, res) => {
     try {
-        const orders = await storedOrders.find({});
+        const orders = await storedOrders.find();
         res.send(orders ? orders.toArray() : []);
     } catch (err) {
         const e = { message: "Error finding stored orders", cause: err };
@@ -79,15 +87,15 @@ app.post("/", async(req, res) => {
     const body = req.body;
     log.debug(JSON.stringify(body));
     const id = uuid();
-    const timestamp = Date.now();
+    const timestamp = `${Date.now()}`;
 
     const event = {
         _id: id,
         id: id,
         source: "api.order.create",
         type: "order.submitted.1",
-        event: null,
-        ctx: null,
+        event: "order.submitted.1",
+        ctx: body.ctx || uuid(),
         time: timestamp,
         data: {
             customerId: body.customerId,
@@ -100,9 +108,8 @@ app.post("/", async(req, res) => {
             time: timestamp,
             status: "Submitting",
             user: body.username,
-            errors: null
-        },
-        prevData: null
+            errors: []
+        }
     };
 
     try {
@@ -111,12 +118,9 @@ app.post("/", async(req, res) => {
 
         try {
             delete event._id;
-            // log.debug(`Submitting event: ${JSON.stringify(event)}`);
-            // console.log(`Broker`);
-            // console.dir(broker);
-            await broker.publish(event);
-            // log.debug(`Updating order: ${JSON.stringify(event)}`);
+            await broker.publish({ event: JSON.stringify(event) });
             await storedOrders.updateOne({ _id: id }, { $set: { status: "Validating" } });
+            res.status(sc.CREATED).send();
         } catch (err) {
             log.error({ message: "Error submitting event", cause: err });
             res.status(sc.INTERNAL_SERVER_ERROR).send(JSON.stringify({ message: "Couldn't publish event", cause: err }));

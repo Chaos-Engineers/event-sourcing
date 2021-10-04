@@ -54,7 +54,7 @@ const joinAndSubscribe = async() => {
     const handleEvent = async payloads => {
         try {
             const element = payloads[0];
-            const payload = element.payload;
+            const payload = JSON.parse(element.payload);
             let prevResult = null;
 
             for (const mapping of eventServiceMap[payload.type]) {
@@ -79,7 +79,7 @@ const joinAndSubscribe = async() => {
                         prevData: JSON.stringify(prevResult)
                     };
 
-                    await broker.publish(event);
+                    await broker.publish({ event: JSON.stringify(event) });
                     prevResult = result;
                 }
             }
