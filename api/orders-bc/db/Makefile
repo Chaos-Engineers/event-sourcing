@@ -5,4 +5,5 @@ install:
 	@helm install db bitnami/mongodb --namespace=api
 
 delete:
-	@helm delete db
+	@helm delete db --namespace=api
+

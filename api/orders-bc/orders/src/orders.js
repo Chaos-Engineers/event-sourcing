@@ -30,7 +30,7 @@ const mongoUrl = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.MON
 const mongo = new MongoClient(mongoUrl);
 
 let db = null;
-let storedOrders = null;
+let ordersCollection = null;
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -44,8 +44,9 @@ app.use((req, res, next) => {
 
 app.get("/", async(req, res) => {
     try {
-        const orders = await storedOrders.find();
-        res.send(orders ? orders.toArray() : []);
+        const orders = await ordersCollection.find();
+        const allOrders = orders ? await orders.toArray() : [];
+        res.send(allOrders);
     } catch (err) {
         const e = { message: "Error finding stored orders", cause: err };
         log.error(e);
@@ -61,23 +62,23 @@ app.put("/", async(req, res) => {
 
     switch (type) {
         case "order.validated.1":
-            await storedOrders.updateOne({ _id: id }, { $set: { "data.status": "Validated", "data.errors": null } });
+            await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Validated", "data.errors": null } });
             res.status(sc.OK).send();
             break;
         case "order.invalid.1":
-            await storedOrders.updateOne({ _id: id }, { $set: { "data.errors": errors, "data.status": "Invalid" } });
+            await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, "data.status": "Invalid" } });
             res.status(sc.OK).send();
             break;
         case "order.authorised.1":
-            await storedOrders.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Authorised" } });
+            await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Authorised" } });
             res.status(sc.OK).send();
             break;
         case "order.shipped.1":
-            await storedOrders.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Shipped" } });
+            await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Shipped" } });
             res.status(sc.OK).send();
             break;
         case "order.cancelled.1":
-            await storedOrders.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Cancelled" } });
+            await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Cancelled" } });
             res.status(sc.OK).send();
             break;
     }
@@ -114,12 +115,12 @@ app.post("/", async(req, res) => {
 
     try {
         log.debug(`Storing order: ${JSON.stringify(event)}`);
-        await storedOrders.insertOne(event);
+        await ordersCollection.insertOne(event);
 
         try {
             delete event._id;
             await broker.publish({ event: JSON.stringify(event) });
-            await storedOrders.updateOne({ _id: id }, { $set: { status: "Validating" } });
+            await ordersCollection.updateOne({ _id: id }, { $set: { status: "Validating" } });
             res.status(sc.CREATED).send();
         } catch (err) {
             log.error({ message: "Error submitting event", cause: err });
@@ -155,8 +156,8 @@ const connectToMongo = async() => {
         log.debug(`OrderApi connecting to mongo`);
         client = await mongo.connect();
         log.info(`OrderApi connected to mongo`);
-        db = client.db(storedOrders);
-        storedOrders = db.collection("documents");
+        db = client.db("api-orders");
+        ordersCollection = db.collection("orders");
     } catch (err) {
         log.error({ message: "Error connecting to mongo", cause: err });
         process.exit(1);

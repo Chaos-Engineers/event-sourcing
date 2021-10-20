@@ -1,3 +1,30 @@
+.orders {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-content: stretch;
+}
+
+.order {
+    display: grid;
+    grid-template-areas: " id   status ordered count items";
+    grid-template-columns: 100px 125px 100px 50px 500px;
+    width: 100%;
+}
+
+.orderItems {
+    display: flex;
+    flex-direction: row;
+    align-content: space-between;
+}
+
+.orderId {
+    width: 8ch;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: monospace;
+}
+
 .new-panel {
     width: 50%;
 }

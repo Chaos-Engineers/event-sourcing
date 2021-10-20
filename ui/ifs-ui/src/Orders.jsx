@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import useFetch from "react-fetch-hook";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import day from "dayjs";
+
 const url = "http://localhost:30000/orders";
 
 const Orders = () => {
@@ -19,8 +21,6 @@ const Orders = () => {
 };
 
 const NewOrderPanel = ({ setPanel }) => {
-  const [order, setOrder] = useState({});
-  const [customer, setCustomer] = useState("");
   const [customerId, setCustomerId] = useState("");
   const [po, setPo] = useState("");
   const [address, setAddress] = useState("");
@@ -86,7 +86,7 @@ const NewOrderPanel = ({ setPanel }) => {
                 ?
               </span>
             </label>
-            <input type="text" value={customer} onChange={e => setCustomer(e.target.value)} placeholder="customer" className="form-control" name="customerid" id="customerid" title="Select your Customer ID" />
+            <input type="text" value={customerId} onChange={e => setCustomerId(e.target.value)} placeholder="customer" className="form-control" name="customerid" id="customerid" title="Select your Customer ID" />
           </div>
           <div className="formbuilder-text form-group field-po">
             <label htmlFor="po" className="formbuilder-text-label">
@@ -193,7 +193,7 @@ const NewOrderPanel = ({ setPanel }) => {
               Close
             </button>
           </div>
-        </div>{" "}
+        </div>
       </div>
     </div>
   );
@@ -208,47 +208,56 @@ const MainPanel = ({ setPanel }) => {
 
   if (orders.isLoading) return <div>Loading...</div>;
 
-  if (Object.keys(orders.data).length === 0) {
-    orders.data["orders"] = [];
-  }
+  if (Object.keys(orders.data).length === 0)
+    return (
+      <div>
+        No orders
+        <button onClick={handleNewOrder}>New Order</button>
+      </div>
+    );
 
   return (
     <div className="main-panel">
-      <button onClick={() => handleNewOrder()}>New Order</button>
+      <button onClick={handleNewOrder}>New Order</button>
 
       <div>Orders</div>
 
       <div className="orders">
-        {orders.data.orders.length === 0 ? (
-          <div>No orders</div>
-        ) : (
-          orders.data.orders.map(order => (
-            <div className="order">
-              <div className="orderId">
-                <div>Id</div>
-                <div>{order.id}</div>
-              </div>
-              <div className="orderItemCount">
-                <div>Item Count</div>
-                <div>{order.items.length}</div>
-              </div>
-              <div className="orderDate">
-                <div>Date</div>
-                <div>{order.time}</div>
-              </div>
-              <div className="orderItems">
-                <div>Items</div>
-                {order.items.map(item => (
-                  <div className="orderItem">
-                    <div>{item.name}</div>
-                    <div>{item.price}</div>
-                    <div>{item.quantity}</div>
-                  </div>
-                ))}
-              </div>
+        <div className="order">
+          <div>Id</div>
+          <div>Status</div>
+          <div>Dated</div>
+          <div>Item Count</div>
+          <div>Items</div>
+        </div>
+        {orders.data.map(order => (
+          <div className="order">
+            <div className="orderId">
+              <div>{order.id}</div>
             </div>
-          ))
-        )}
+            <div className="status">
+              <div>{order.data.status}</div>
+            </div>
+            <div className="orderDate">
+              <div>{day(Date(order.time)).format("DD-MM-YYYY")}</div>
+            </div>
+            <div className="orderItemCount">
+              <div>{order.data.items ? order.data.items.length : 0}</div>
+            </div>
+            <div className="orderItems">
+              {/* <div>Items</div> */}
+              {order.data.items?.map(item => (
+                <div className="orderItem">
+                  <span>
+                    {item.name} {item.price}@${item.quantity}
+                  </span>
+                  {/* <div></div>
+         <div>{item.quantity}</div> */}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

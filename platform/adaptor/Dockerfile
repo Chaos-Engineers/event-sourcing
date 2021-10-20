@@ -3,4 +3,4 @@ workdir work
 copy package* /work/
 run npm i
 copy src/ /work/src/
-cmd ["node","src/index.js"]
+cmd ["npm","start"]
