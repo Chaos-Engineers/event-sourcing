@@ -4,9 +4,6 @@ name: k3d-lab
 servers: 1 
 agents: 1
 image: rancher/k3s:v1.21.5-k3s2
-  # rancher/k3s:v1.21.1-rc1-k3s1
-  # image: rancher/k3s:v1.21.3-k3s1
-  # rancher/k3s:v1.21.5-k3s2
 registries:
   create:
     name: registry.labs

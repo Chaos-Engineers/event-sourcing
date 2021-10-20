@@ -19,7 +19,7 @@ const log = {
     error: console.error
 };
 
-log.info("Order API Starting");
+log.info("Order API Starting...");
 
 // const expressLogger = expressPino({ logger: log });
 // app.use(expressLogger);

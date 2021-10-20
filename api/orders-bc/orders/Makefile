@@ -4,10 +4,10 @@ cycle: delete build release deploy
 install: build release redis-secret db-secret deploy
 
 dev:
-	@docker build -t labs/ordersapi -f Dockerfile_dev .
+	@okteto up -n api
 
-run:
-	@docker run -it --rm -p 8080:80 labs/ordersapi
+down:
+	@okteto down -n api
 
 build:
 	@echo "\033[0;32mBuilding orders API\033[0m"

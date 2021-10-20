@@ -7,7 +7,7 @@ const pino = require("pino");
 
 const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
 
-log.info("Adaptor Starting");
+log.info("Adaptor Starting...");
 
 const eventServiceMap = {};
 let consumerGroup = null;

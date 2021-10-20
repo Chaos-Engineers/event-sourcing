@@ -5,7 +5,7 @@ Event Sourcing Prototype in ES2021 hosted in Rancher's K3D, a tiny K8S distro fo
 ---
 
 ## System Requirements:
-You need to have Docker, K3D, kubectl, make, jq and helm installed. The following instructions are in the `provision.sh` bash script in the root of the project.
+You need to have Docker, K3D, kubectl, okteto, make, jq and helm installed. The following instructions are in the `provision.sh` bash script in the root of the project.
 
 ### Docker:
 curl -s get.docker.com | sh
@@ -60,6 +60,12 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 kubectl krew update
 kubectl krew install get-all change-ns ingress-nginx janitor doctor ns pod-dive pod-inspect pod-lens pod-logs pod-shell podevents service-tree sick-pods view-secret
 ```
+
+### Okteto CLI:
+```
+curl https://get.okteto.com -sSfL | sh
+```
+
 ## Directory Structure
 ```
 ├── api

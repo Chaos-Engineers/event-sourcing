@@ -1,0 +1,9 @@
+.git
+
+# Optional npm cache directory
+.npm
+
+# Output of 'npm pack'
+*.tgz
+
+

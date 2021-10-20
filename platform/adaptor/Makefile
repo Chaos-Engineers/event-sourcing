@@ -27,6 +27,9 @@ deploy:
 	@echo "\033[0;32mWaiting for adaptor pod to be ready\033[0m"
 	@kubectl wait $$(kubectl get pods -n platform -o name | grep adaptor) --for=condition=ready --timeout=30s -n platform
 
+dev:
+	@okteto up -n platform
+
 delete:
 	@kubectl delete -f adaptor.yaml
 

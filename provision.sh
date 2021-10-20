@@ -37,3 +37,6 @@ echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> .bashrc
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 kubectl krew update
 kubectl krew install get-all change-ns ingress-nginx janitor doctor ns pod-dive pod-inspect pod-lens pod-logs pod-shell podevents service-tree sick-pods view-secret
+
+# Okteto
+curl https://get.okteto.com -sSfL | sh

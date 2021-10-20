@@ -50,6 +50,10 @@ spec:
           image: registry.labs:5000/labs/redis-rest-adaptor
           ports:
             - containerPort: 80
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
           volumeMounts:
             - name: registry
               mountPath: "/registry"
