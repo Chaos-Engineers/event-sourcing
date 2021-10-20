@@ -4,19 +4,18 @@ cycle: delete install
 install: build release deploy
 
 dev:
-	@docker build -t bryandollery/ifsui -f Dockerfile_dev .
+	@docker build -t localhost:5000/labs/ifsui -f Dockerfile_dev .
 
 run:
-	@docker run -it --rm -p 8080:80 bryandollery/ifsui
-
+	@docker run -it --rm -p 8080:80 localhost:5000/labs/ifsui
 
 build:
 	@echo "\033[0;32mBuilding ifsui ui\033[0m"
-	@docker build -t bryandollery/ifsui .
+	@docker build -t localhost:5000/labs/ifsui .
 
 release:
 	@echo "\033[0;32mReleasing ifsui ui\033[0m"
-	@docker push bryandollery/ifsui
+	@docker push localhost:5000/labs/ifsui
 
 deploy:
 	@echo "\033[0;32mDeploying ifsui ui\033[0m"

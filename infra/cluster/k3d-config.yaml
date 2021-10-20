@@ -34,3 +34,8 @@ options:
   kubeconfig:
     updateDefaultKubeconfig: true 
     switchCurrentContext: true 
+  k3s:
+    nodeLabels:
+      - label: sharedvol=true
+        nodeFilters:
+          - agent:*

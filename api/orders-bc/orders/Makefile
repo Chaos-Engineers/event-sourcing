@@ -4,18 +4,18 @@ cycle: delete build release deploy
 install: build release redis-secret db-secret deploy
 
 dev:
-	@docker build -t bryandollery/ordersapi -f Dockerfile_dev .
+	@docker build -t labs/ordersapi -f Dockerfile_dev .
 
 run:
-	@docker run -it --rm -p 8080:80 bryandollery/ordersapi
+	@docker run -it --rm -p 8080:80 labs/ordersapi
 
 build:
 	@echo "\033[0;32mBuilding orders API\033[0m"
-	@docker build -t bryandollery/ordersapi .
+	@docker build -t localhost:5000/labs/ordersapi .
 
 release:
 	@echo "\033[0;32mReleasing orders API\033[0m"
-	@docker push bryandollery/ordersapi
+	@docker push localhost:5000/labs/ordersapi
 
 redis-secret:
 	@echo "\033[0;32mStoring redis creds\033[0m"

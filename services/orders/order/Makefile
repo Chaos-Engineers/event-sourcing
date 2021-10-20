@@ -1,21 +1,21 @@
 default: dev
 
 dev:
-	@docker build -t bryandollery/order -f Dockerfile_dev .
+	@docker build -t localhost:5000/labs/order -f Dockerfile_dev .
 
 run:
-	@docker run -it --rm -p 8080:80 bryandollery/order
+	@docker run -it --rm -p 8080:80 localhost:5000/labs/order
 
 cycle: delete install
 install: build release deploy
 
 build:
 	@echo "\033[0;32mBuilding order\033[0m"
-	@docker build -t bryandollery/order .
+	@docker build -t localhost:5000/labs/order .
 
 release:
 	@echo "\033[0;32mPushing order\033[0m"
-	@docker push bryandollery/order
+	@docker push localhost:5000/labs/order
 
 deploy:
 	@kubectl apply -f order.yaml

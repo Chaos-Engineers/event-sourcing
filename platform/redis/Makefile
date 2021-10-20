@@ -3,7 +3,7 @@
 cycle: delete install
 
 install:
-	@helm install redis bitnami/redis --namespace platform
+	@helm install redis bitnami/redis --namespace platform --set replica.replicaCount=1 --set architecture=standalone
 
 delete:
 	@helm delete redis
