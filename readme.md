@@ -5,7 +5,7 @@ Event Sourcing Prototype in ES2021 hosted in Rancher's K3D, a tiny K8S distro fo
 ---
 
 ## System Requirements:
-You need to have Docker, K3D, kubectl, make, and jq, helm installed.
+You need to have Docker, K3D, kubectl, make, jq and helm installed. The following instructions are in the `provision.sh` bash script in the root of the project.
 
 ### Docker:
 curl -s get.docker.com | sh
