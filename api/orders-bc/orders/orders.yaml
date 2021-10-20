@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: orders
-          image: bryandollery/ordersapi
+          image: registry.labs:5000/labs/ordersapi
           ports:
             - containerPort: 80
           env:

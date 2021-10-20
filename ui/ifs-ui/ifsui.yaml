@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: ifsui
-        image: bryandollery/ifsui
+        image: registry.labs:5000/labs/ifsui
         ports:
         - containerPort: 80
 ---
