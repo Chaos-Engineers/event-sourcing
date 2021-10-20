@@ -47,7 +47,7 @@ spec:
                 path: "event-service-event"
       containers:
         - name: adaptor
-          image: bryandollery/redis-rest-adaptor
+          image: registry.labs:5000/labs/redis-rest-adaptor
           ports:
             - containerPort: 80
           volumeMounts:

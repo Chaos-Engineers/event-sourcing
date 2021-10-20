@@ -5,18 +5,18 @@ install: build release redis-secret deploy
 cycle: delete build release deploy logs
 
 build-dev:
-	@docker build -t bryandollery/redis-rest-adaptor -f Dockerfile_dev .
+	@docker build -t labs/redis-rest-adaptor -f Dockerfile_dev .
 
 build:
 	@echo "\033[0;32mBuilding adaptor\033[0m"
-	@docker build -t bryandollery/redis-rest-adaptor .
+	@docker build -t localhost:5000/labs/redis-rest-adaptor .
 
 run-dev:
-	@docker run -it --rm -p 8080:80 -e REDIS_URL=redis://localhost:30002/redis -v ./registry:/registry bryandollery/redis-rest-adaptor
+	@docker run -it --rm -p 8080:80 -e REDIS_URL=redis://localhost:30002/redis -v ./registry:/registry labs/redis-rest-adaptor
 
 release:
 	@echo "\033[0;32mPushing adaptor\033[0m"
-	@docker push bryandollery/redis-rest-adaptor
+	@docker push localhost:5000/labs/redis-rest-adaptor
 
 redis-secret:
 	@echo "\033[0;32mStoring adaptor creds\033[0m"
