@@ -17,8 +17,9 @@ curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 # Helm:
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
-# JQ:
-sudo apt install -y jq
+# JQ & Make:
+sudo apt update 
+sudo apt install -y jq make
 
 # Krew
 (
@@ -26,7 +27,7 @@ sudo apt install -y jq
   OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
   ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
   curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" &&
-  tar zxvf krew.tar.gz &&
+  tar zxf krew.tar.gz &&
   KREW=./krew-"${OS}_${ARCH}" &&
   "$KREW" install krew
 )

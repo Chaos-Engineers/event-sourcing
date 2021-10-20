@@ -35,6 +35,11 @@ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scr
 sudo apt install -y jq
 ```
 
+### Make:
+```
+sudo apt install -y make
+```
+
 ## Optional:
 
 ### Krew
