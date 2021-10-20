@@ -4,7 +4,8 @@
     "description": "",
     "main": "adaptor.js",
     "scripts": {
-        "start": "node src/adaptor.js"
+        "start": "node src/adaptor.js",
+        "nodemon": "nodemon src/adaptor.js"
     },
     "author": "",
     "license": "ISC",
