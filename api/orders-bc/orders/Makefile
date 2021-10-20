@@ -23,7 +23,7 @@ redis-secret:
 
 db-secret:
 	@echo "\033[0;32mStoring db creds\033[0m"
-	@kubectl create secret generic db-password -n api --from-literal=password=$$(kubectl get secret --namespace api db-mongodb -o jsonpath="{.data.mongodb-root-password}" | base64 --decode)
+	@kubectl create secret generic api-db-password -n api --from-literal=password=$$(kubectl get secret --namespace api db-mongodb -o jsonpath="{.data.mongodb-root-password}" | base64 --decode)
 
 deploy:
 	@echo "\033[0;32mDeploying orders API\033[0m"

@@ -1,12 +1,11 @@
-default: dev
+default: build release
 
 dev:
-	@docker build -t localhost:5000/labs/order -f Dockerfile_dev .
+	@okteto up -n contexts-orders
 
-run:
-	@docker run -it --rm -p 8080:80 localhost:5000/labs/order
 
 cycle: delete install
+
 install: build release deploy
 
 build:

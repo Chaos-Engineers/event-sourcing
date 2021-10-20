@@ -8,7 +8,7 @@ metadata:
     app: order
     type: api
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: order
@@ -22,6 +22,10 @@ spec:
         image: registry.labs:5000/labs/order
         ports:
         - containerPort: 80
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
 ---
 apiVersion: v1
 kind: Service

@@ -57,10 +57,12 @@ const joinAndSubscribe = async () => {
   const handleEvent = async payloads => {
     try {
       const element = payloads[0];
-      const payload = JSON.parse(element.payload);
+      const payload = JSON.parse(element.payload.event);
+      console.log(`Payload: ${JSON.stringify(payload)}`)
       let prevResult = null;
 
       for (const mapping of eventServiceMap[payload.type]) {
+        console.log(`Mapping: ${JSON.stringify(mapping)}`)
         const { body: result, statusCode } = mapping.put //
           ? await got.put(mapping.url, { json: { payload } })
           : await got.post(mapping.url, { json: { payload: payload } });

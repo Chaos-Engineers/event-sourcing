@@ -4,7 +4,8 @@
     "description": "",
     "main": "orders.js",
     "scripts": {
-        "start": "node src/order.js"
+        "start": "node src/order.js",
+        "nodemon": "nodemon src/order.js"
     },
     "author": "",
     "license": "ISC",

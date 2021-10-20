@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 const log = pino({ level: process.env.LOG_LEVEL || "info", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
-log.info("Order Service starting");
+log.info("Order Service starting...");
 
 const expressLogger = expressPino({ logger: log });
 app.use(expressLogger);
