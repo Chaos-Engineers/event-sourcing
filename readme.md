@@ -40,6 +40,12 @@ sudo apt install -y jq
 sudo apt install -y make
 ```
 
+
+### Okteto CLI:
+```
+curl https://get.okteto.com -sSfL | sh
+```
+
 ## Optional:
 
 ### Krew
@@ -61,10 +67,10 @@ kubectl krew update
 kubectl krew install get-all change-ns ingress-nginx janitor doctor ns pod-dive pod-inspect pod-lens pod-logs pod-shell podevents service-tree sick-pods view-secret
 ```
 
-### Okteto CLI:
-```
-curl https://get.okteto.com -sSfL | sh
-```
+### Operator SDK
+(assuming you have homebrew or homebrew-linux installed)
+brew install operator-sdk
+operator-sdk olm install
 
 ## Directory Structure
 ```

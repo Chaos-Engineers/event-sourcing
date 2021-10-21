@@ -4,17 +4,18 @@ const { v4: uuid } = require("uuid");
 const Redis = require("ioredis");
 const brokerType = require("redis-streams-broker").StreamChannelBroker;
 const pino = require("pino");
+const chalk = require("chalk");
 
 const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
 
-log.info("Adaptor Starting...");
+console.info(chalk.bold.magentaBright("Adaptor Starting..."));
 
 const eventServiceMap = {};
 let consumerGroup = null;
 let subscriptionHandle = null;
 
 const readAndProcessEventMappings = () => {
-  log.debug(`Adaptor reading properties`);
+  console.debug(`Adaptor reading properties`);
 
   const eventServiceEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-service-event"), "utf8");
   eventServiceEventRaw.split("\n").forEach(line => {
@@ -32,11 +33,11 @@ const readAndProcessEventMappings = () => {
     eventServiceMap[input].push({ source, url: `http://${service}.${namespace}.svc.cluster.local/${endpoint || input}`, output, put: _namespace.startsWith("+"), error: error });
   });
 
-  log.debug({ routes: eventServiceMap });
+  console.dir({ routes: eventServiceMap });
 };
 
 const joinAndSubscribe = async () => {
-  log.debug(`Adaptor connecting to redis`);
+  console.info(chalk.yellow(`Adaptor connecting to redis`));
 
   const redisClient = new Redis({
     port: 6379,
@@ -58,23 +59,29 @@ const joinAndSubscribe = async () => {
     try {
       const element = payloads[0];
       const payload = JSON.parse(element.payload.event);
-      console.log(`Payload: ${JSON.stringify(payload)}`)
       let prevResult = null;
 
       for (const mapping of eventServiceMap[payload.type]) {
-        console.log(`Mapping: ${JSON.stringify(mapping)}`)
+        console.dir({ Mapping: mapping });
+        console.info(chalk`Handling {green ${mapping.source}} by calling {cyan ${mapping.url}}`);
+
         const { body: result, statusCode } = mapping.put //
           ? await got.put(mapping.url, { json: { payload } })
           : await got.post(mapping.url, { json: { payload: payload } });
+        
+          console.info(chalk`Status {green ${statusCode}}`);
 
         if (statusCode < 200 || statusCode >= 299) {
           if (mapping.error) {
+            console.info(chalk`Sending {red err} response to url: {cyan ${mapping.error}}`);
+        
             await got.post(mapping.error, { json: { payload, result, statusCode } });
           } else {
-            log.error(`Unhandled Error sending event to ${mapping.url} : Response ${statusCode}`);
+            console.error(chalk.red(`Unhandled Error sending event to ${mapping.url} : Response ${statusCode}`));
           }
         } else if ((statusCode === 200 || statusCode === 201) && mapping.output !== "-") {
           const id = uuid();
+          console.info(chalk`Publishing {green event} to bus ({cyan id: ${id}})`);
 
           const event = {
             id: id,
@@ -93,22 +100,22 @@ const joinAndSubscribe = async () => {
 
       await element.markAsRead();
     } catch (err) {
-      log.error(err);
+      console.error(chalk.red(JSON.stringify(err)));
     }
   };
 
-  log.info(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`);
+  console.info(chalk.yellow(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`));
   consumerGroup = await broker.joinConsumerGroup(consumerGroupName);
-  log.debug(`Adaptor subscribing as ${adaptorName}`);
+  console.info(chalk.yellow(`Adaptor subscribing as ${adaptorName}`));
   subscriptionHandle = await consumerGroup.subscribe(adaptorName, handleEvent, pollSpan, payloadsToFetch, readPending);
-  log.debug(`Adaptor ready`);
+  console.info(chalk.bold.magenta(`Adaptor ready`));
 };
 
 readAndProcessEventMappings();
 joinAndSubscribe();
 
 process.on("SIGTERM", () => {
-  log.info(`SIGTERM signal received in adaptor: ${adaptorName}`);
+  console.info(chalk.red(`SIGTERM signal received in adaptor: ${adaptorName}`));
   if (consumerGroup && subscriptionHandle) consumerGroup.unsubscribe(subscriptionHandle);
   process.exit(0);
 });

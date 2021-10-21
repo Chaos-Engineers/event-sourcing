@@ -3,8 +3,10 @@ default: build release
 dev:
 	@okteto up -n contexts-orders
 
+down:
+	@okteto down -n contexts-orders
 
-cycle: delete install
+cycle: down delete install dev
 
 install: build release deploy
 

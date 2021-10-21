@@ -1,21 +1,49 @@
+.orders-list {
+    margin-top: 50px;
+}
+
 .orders {
     display: flex;
     flex-direction: column;
     width: 100%;
     align-content: stretch;
+    border-bottom: solid 1px #aaa;
 }
 
 .order {
     display: grid;
-    grid-template-areas: " id   status ordered count items";
-    grid-template-columns: 100px 125px 100px 50px 500px;
+    grid-template-areas: "idx   id    status ordered count items";
+    grid-template-columns: 60px 100px 125px  100px   100px 600px;
     width: 100%;
+}
+
+.orderItemCount, .index, .centre {
+    text-align: center;
+}
+
+.lineItem {
+    border: solid 1px #aaa;
+    cursor: pointer;
+}
+
+.lineItem:hover {
+    background-color: rgb(253, 243, 209);
+}
+
+.stripe {
+    background-color: #f5f5f5;
+    border-top: none;
+    border-bottom: none;
 }
 
 .orderItems {
     display: flex;
     flex-direction: row;
     align-content: space-between;
+}
+
+.orderItem {
+    margin-right: 10px;
 }
 
 .orderId {

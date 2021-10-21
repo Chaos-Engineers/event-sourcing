@@ -14,11 +14,7 @@ down:
 	@make -C infra/cluster down
 
 platform:
-	@make -C platform/dev ginstall grelease
-	@make -C platform/context install
-	@make -C platform/ingress install
-	@make -C platform/redis install
-	@make -C platform/adaptor install
+	@make -C platform install
 
 services:
 	@make -C services/orders install

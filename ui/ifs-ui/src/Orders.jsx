@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import useFetch from "react-fetch-hook";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -219,45 +219,41 @@ const MainPanel = ({ setPanel }) => {
   return (
     <div className="main-panel">
       <button onClick={handleNewOrder}>New Order</button>
-
-      <div>Orders</div>
-
-      <div className="orders">
-        <div className="order">
-          <div>Id</div>
-          <div>Status</div>
-          <div>Dated</div>
-          <div>Item Count</div>
-          <div>Items</div>
-        </div>
-        {orders.data.map(order => (
+      <div className="orders-list">
+        <div className="orders">
           <div className="order">
-            <div className="orderId">
-              <div>{order.id}</div>
-            </div>
-            <div className="status">
-              <div>{order.data.status}</div>
-            </div>
-            <div className="orderDate">
-              <div>{day(Date(order.time)).format("DD-MM-YYYY")}</div>
-            </div>
-            <div className="orderItemCount">
-              <div>{order.data.items ? order.data.items.length : 0}</div>
-            </div>
-            <div className="orderItems">
-              {/* <div>Items</div> */}
-              {order.data.items?.map(item => (
-                <div className="orderItem">
-                  <span>
-                    {item.name} {item.price}@${item.quantity}
-                  </span>
-                  {/* <div></div>
-         <div>{item.quantity}</div> */}
-                </div>
-              ))}
-            </div>
+            <div className="header centre">#</div>
+            <div className="header">Id</div>
+            <div className="header">Status</div>
+            <div className="header">Dated</div>
+            <div className="header centre">Items</div>
+            <div className="header">Details</div>
           </div>
-        ))}
+          {orders.data.map((order, idx) => (
+            <div className={`order lineItem ${idx % 2 !== 0 ? "stripe" : ""}`}>
+              <div className="index">{idx + 1}</div>
+              <div className="orderId">
+                <div>{order.id}</div>
+              </div>
+              <div className="status">
+                <div>{order.data.status}</div>
+              </div>
+              <div className="orderDate">
+                <div>{day(Date(order.time)).format("DD-MM-YYYY")}</div>
+              </div>
+              <div className="orderItemCount">
+                <div>{order.data.items ? order.data.items.length : 0}</div>
+              </div>
+              <div className="orderItems">
+                {order.data.items?.map(item => (
+                  <div className="orderItem">
+                    {item.name} {item.price}@${item.quantity}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
