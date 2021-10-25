@@ -1,11 +1,14 @@
 #!/bin/bash
 
 function Docker {
-  curl -s get.docker.com | sh
+  echo "Installing Docker"
+  curl -sL get.docker.com | sh
+  sudo usermod -aG docker $USER
 }
 
 function Kubectl {
-  curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+  echo "Installing Kubectl"
+  curl -sLO "https://storage.googleapis.com/kubernetes-release/release/$(curl -sL https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
   chmod +x ./kubectl
   sudo mv ./kubectl /usr/local/bin/kubectl
   echo 'source <(kubectl completion bash)' >>~/.bashrc
@@ -14,32 +17,38 @@ function Kubectl {
 }
 
 function K3D {
-  curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
+  echo "Installing K3D"
+  curl -sL https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 }
 
-function Helm{
-  curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+function Helm {
+  echo "Installing Helm"
+  curl -sL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 }
 
-# JQ & Make:
-function JqAndMake {
-  sudo apt update 
-  sudo apt install -y jq make
+function LinuxTools {
+  echo "Installing basic GNU/Linux Tools for k8s labs"
+  sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt update -qq >/dev/null
+  sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt install -y -qq curl jq make unzip zip vim git >/dev/null
 }
 
 function Okteto {
-  curl https://get.okteto.com -sSfL | sh
+  echo "Installing Okteto"
+  curl -sSfL https://get.okteto.com | sh
 }
 
-# Optional Stuff
 function Krew {
-  set -x; cd "$(mktemp -d)" &&
-  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
-  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
-  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" &&
-  tar zxf krew.tar.gz &&
-  KREW=./krew-"${OS}_${ARCH}" &&
-  "$KREW" install krew
+  echo "Installing Krew"
+
+  (
+    set -x; cd "$(mktemp -d)" &&
+    OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+    KREW="krew-${OS}_${ARCH}" &&
+    curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+    tar zxvf "${KREW}.tar.gz" &&
+    ./"${KREW}" install krew
+  )
 
   echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> .bashrc
 
@@ -48,26 +57,34 @@ function Krew {
   kubectl krew install get-all change-ns ingress-nginx janitor doctor ns pod-dive pod-inspect pod-lens pod-logs pod-shell podevents service-tree sick-pods view-secret
 }
 
+function Tekton {
+  echo "Installing tekton cli"
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3EFE0E0A2F2F60AA
+  echo "deb http://ppa.launchpad.net/tektoncd/cli/ubuntu focal main" | sudo tee /etc/apt/sources.list.d/tektoncd-ubuntu-cli.list
+  sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt update -qq
+  sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt install -y -qq tektoncd-cli
+}
+
 function Operators {
+  echo "Installing Operator Framework"
   brew install operator-sdk
   operator-sdk olm install
 }
 
 function Required {
+  LinuxTools
   Docker
   Kubectl
-  K3D
-  JqAndMake
-}
-
-function Optional {
+  Helm
   Krew
-  Operators
+  K3D
+  Okteto
 }
 
 function Install {
   Required
-  # Optional
+  # Operators
+  # Tekton
 }
 
 Install
