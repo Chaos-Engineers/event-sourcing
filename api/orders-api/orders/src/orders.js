@@ -84,7 +84,6 @@ app.post("/", async (req, res) => {
   const timestamp = `${Date.now()}`;
 
   const event = {
-    _id: id,
     id: id,
     source: "api.order.create",
     type: "order.submitted.1",
@@ -108,10 +107,9 @@ app.post("/", async (req, res) => {
 
   try {
     console.dir({ action: "Storing order", event });
-    await ordersCollection.insertOne(event);
+    await ordersCollection.insertOne({ _id: event.id, ...event });
 
     try {
-      delete event._id;
       await broker.publish({ event: JSON.stringify(event) });
       await ordersCollection.updateOne({ _id: id }, { $set: { status: "Validating" } });
       res.status(sc.CREATED).send();
