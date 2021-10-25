@@ -19,7 +19,6 @@ const Orders = () => {
     </>
   );
 };
-
 const NewOrderPanel = ({ setPanel }) => {
   const [customerId, setCustomerId] = useState("");
   const [po, setPo] = useState("");

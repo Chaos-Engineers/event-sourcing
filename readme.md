@@ -75,7 +75,7 @@ operator-sdk olm install
 ## Directory Structure
 ```
 ├── api
-│   └── orders-bc
+│   └── orders-api
 │       ├── db
 │       └── orders
 ├── infra
