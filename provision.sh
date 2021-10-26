@@ -73,7 +73,7 @@ function Operators {
 
 function Required {
   LinuxTools
-  Docker
+  # Docker
   Kubectl
   Helm
   Krew
