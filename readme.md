@@ -88,7 +88,7 @@ operator-sdk olm install
 │   └── orders
 │       └── order
 └── ui
-    └── ifs-ui
+    └── ui
 ```
 
 * `Infra` contains the k3d cluster 
