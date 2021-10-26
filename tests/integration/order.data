@@ -1,0 +1,16 @@
+{
+   "ctx": "${uuid}",
+   "customerId": "${uuid}",
+   "po": "${uuid}",
+   "address": "dummy",
+   "deliverDate": "01/01/2022",
+   "price": "100.00",
+   "currency": "USD",
+   "username": "bryan@bryan.com",
+   "items": [
+       {"name": "Pen (blue)", "quantity": 1, "price":"25"},
+       {"name": "Pinapple", "quantity": 1, "price":"25"},
+       {"name": "Apple", "quantity": 1, "price":"25"},
+       {"name": "Pen (black)", "quantity": 1, "price":"25"}
+   ]
+}

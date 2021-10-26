@@ -164,5 +164,5 @@ process.on("SIGTERM", () => {
 registerBroker();
 connectToMongo();
 
-console.debug("Order API ready");
 app.listen(80);
+console.info(chalk.bold.magenta("Orders API ready"));

@@ -96,3 +96,4 @@ app.post("/approve", (req, res) => {
 });
 
 app.listen(80);
+console.info(chalk.bold.magenta("Order Service ready"));

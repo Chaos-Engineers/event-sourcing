@@ -25,7 +25,7 @@ api:
 
 ui:
 	@make -C ui/context install
-	@make -C ui/ifs-ui install
+	@make -C ui/ui install
 	
 lsi:
 	@curl -s http://localhost:5000/v2/_catalog | jq '.repositories'
