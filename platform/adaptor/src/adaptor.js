@@ -32,12 +32,12 @@ const readAndProcessEventMappings = () => {
     if (!eventServiceMap.hasOwnProperty(input)) eventServiceMap[input] = [];
     eventServiceMap[input].push({ source, url: `http://${service}.${namespace}.svc.cluster.local/${endpoint || input}`, output, put: _namespace.startsWith("+"), error: error });
   });
-
+  
   console.dir({ routes: eventServiceMap });
 };
 
 const joinAndSubscribe = async () => {
-  console.info(chalk.yellow(`Adaptor connecting to redis`));
+  console.info(chalk.yellow(`Adaptor connecting to redis...`));
 
   const redisClient = new Redis({
     port: 6379,
@@ -108,7 +108,6 @@ const joinAndSubscribe = async () => {
   consumerGroup = await broker.joinConsumerGroup(consumerGroupName);
   console.info(chalk.yellow(`Adaptor subscribing as ${adaptorName}`));
   subscriptionHandle = await consumerGroup.subscribe(adaptorName, handleEvent, pollSpan, payloadsToFetch, readPending);
-  console.info(chalk.bold.magenta(`Adaptor ready`));
 };
 
 readAndProcessEventMappings();
@@ -119,3 +118,5 @@ process.on("SIGTERM", () => {
   if (consumerGroup && subscriptionHandle) consumerGroup.unsubscribe(subscriptionHandle);
   process.exit(0);
 });
+
+console.info(chalk.bold.magenta(`Adaptor ready`));

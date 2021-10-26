@@ -4,7 +4,7 @@ import "./index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import day from "dayjs";
 
-const url = "http://localhost:30000/orders";
+const url = "https://bryandollery-chaos-engineers-event-sourcing-wqx5wp6f9w5g-30000.githubpreview.dev/orders";
 
 const Orders = () => {
   const [panel, setPanel] = useState("main");
@@ -207,7 +207,8 @@ const MainPanel = ({ setPanel }) => {
 
   if (orders.isLoading) return <div>Loading...</div>;
 
-  if (Object.keys(orders.data).length === 0)
+  
+  if (orders?.data && Object.keys(orders.data).length === 0)
     return (
       <div>
         No orders
@@ -228,7 +229,7 @@ const MainPanel = ({ setPanel }) => {
             <div className="header centre">Items</div>
             <div className="header">Details</div>
           </div>
-          {orders.data.map((order, idx) => (
+          {orders && orders.data.map((order, idx) => (
             <div className={`order lineItem ${idx % 2 !== 0 ? "stripe" : ""}`}>
               <div className="index">{idx + 1}</div>
               <div className="orderId">

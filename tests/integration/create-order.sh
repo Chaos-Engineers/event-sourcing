@@ -25,6 +25,6 @@ generate_post_data()
 EOF
 }
 
-echo "Posting: $(generate_post_data)"
+echo "Posting: $(generate_post_data) to http://localhost:3000/orders"
 
-curl -Ls -X POST -H "Content-Type: application/json" --data "$(generate_post_data)" https://bryandollery-chaos-engineers-event-sourcing-wqx5wp6f9w5g-30000.githubpreview.dev/orders
+curl -Lsv -X POST -H "Content-Type: application/json" --data "$(generate_post_data)" http://localhost:30000/orders
