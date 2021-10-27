@@ -7,18 +7,21 @@ metadata:
 data:
   redis-url: redis-master.platform.svc.cluster.local
   event-service-event: |
-    order.submitted.1|contexts-orders.order.validate|order.validated.1|order.invalid.1
-    order.validated.1|contexts-orders.order.create|order.created.1|order.creation-failed.1
-    order.validated.1|+api.order|-|-
-    order.invalid.1|+api.order|-|-
-    order.created.1|contexts-orders.order.authorise|order.authorised.1|order.unauthorised.1
+    order.submitted.1|contexts-orders.order.submitted|order.created.1|order.creation-failed.1
+    order.created.1|contexts-orders.order.validate|order.validated.1|order.invalid.1
+    order.changed.1|contexts-orders.order.validate|order.validated.1|order.invalid.1
+    order.validated.1|contexts-orders.order.authorise|order.authorised.1|order.unauthorised.1
     order.authorised.1|contexts-orders.order.fulfil|order.ship.1|order.fulfillment-failed.1
-    order.authorised.1|+api.order|-|-
     order.ship.1|contexts-orders.order.ship|order.shipped.1|order.shipment-failed.1
-    order.shipped.1|+api.order|-|-
-    order.received.1|contexts-orders.order.received|order.close.1|order.received-failed.1
+    order.delivered.1|contexts-orders.order.delivered|order.close.1|order.deliverey-failed.1
     order.cancelled.1|contexts-orders.order.cancel|order.cancelled.1|order.cancellation-failed.1
-    order.cancelled.1|+api.order|-|-
+    order.created.1|+api.order.received|-|-
+    order.creationFailed.1|+api.order.resend|-|-
+    order.validated.1|+api.order.valid|-|-
+    order.invalid.1|+api.order.invalid|-|-
+    order.authorised.1|+api.order.authorised|-|-
+    order.shipped.1|+api.order.shipped|-|-
+    order.cancelled.1|+api.order.cancelled|-|-
 ---
 apiVersion: apps/v1
 kind: Deployment

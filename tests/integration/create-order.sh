@@ -27,4 +27,4 @@ EOF
 
 echo "Posting: $(generate_post_data) to http://localhost:3000/orders"
 
-curl -Lsv -X POST -H "Content-Type: application/json" --data "$(generate_post_data)" http://localhost:30000/orders
+curl -Ls -X POST -H "Content-Type: application/json" --data "$(generate_post_data)" http://localhost:30000/orders

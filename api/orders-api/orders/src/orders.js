@@ -47,34 +47,34 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.put("/", async (req, res) => {
-  const event = req.body.data;
-  const id = event.id;
-  const type = event.type;
-  const errors = event.errors;
+app.put("/received", async (req, res) => {
+  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Received", "data.errors": null } });
+  res.sendStatus(sc.OK);
+});
 
-  switch (type) {
-    case "order.validated.1":
-      await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Validated", "data.errors": null } });
-      res.status(sc.OK).send();
-      break;
-    case "order.invalid.1":
-      await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, "data.status": "Invalid" } });
-      res.status(sc.OK).send();
-      break;
-    case "order.authorised.1":
-      await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Authorised" } });
-      res.status(sc.OK).send();
-      break;
-    case "order.shipped.1":
-      await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Shipped" } });
-      res.status(sc.OK).send();
-      break;
-    case "order.cancelled.1":
-      await ordersCollection.updateOne({ _id: id }, { $set: { "data.errors": errors, null: "Cancelled" } });
-      res.status(sc.OK).send();
-      break;
-  }
+app.put("/resend", async (req, res) => {
+  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Resend", "data.errors": res.body } });
+  res.sendStatus(sc.OK);
+});
+
+app.put("/valid", async (req, res) => {
+  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Valid", "data.errors": null } });
+  res.sendStatus(sc.OK);
+});
+
+app.put("/invalid", async (req, res) => {
+  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Invalid", "data.errors": req.body } });
+  res.sendStatus(sc.OK);
+});
+
+app.put("/authorised", async (req, res) => {
+  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Authorised", "data.errors": null } });
+  res.sendStatus(sc.OK);
+});
+
+app.put("/unauthorised", async (req, res) => {
+  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Unauthorised", "data.errors": req.body } });
+  res.sendStatus(sc.OK);
 });
 
 app.post("/", async (req, res) => {
@@ -85,7 +85,7 @@ app.post("/", async (req, res) => {
 
   const event = {
     id: id,
-    source: "api.order.create",
+    source: "api.order.neworder",
     type: "order.submitted.1",
     event: "order.submitted.1",
     ctx: body.ctx || uuid(),
@@ -107,16 +107,16 @@ app.post("/", async (req, res) => {
 
   try {
     console.dir({ action: "Storing order", event });
-    await ordersCollection.insertOne({ _id: event.id, ...event });
+    await ordersCollection.insertOne({ _id: event.id, ...event.data });
 
     try {
       await broker.publish({ event: JSON.stringify(event) });
-      await ordersCollection.updateOne({ _id: id }, { $set: { status: "Validating" } });
-      res.status(sc.CREATED).send();
+      res.sendStatus(sc.CREATED);
     } catch (err) {
-      console.error({ message: "Error submitting event", cause: err });
+      console.error({ message: "Error publishing event", cause: err });
       res.status(sc.INTERNAL_SERVER_ERROR).send(JSON.stringify({ message: "Couldn't publish event", cause: err }));
     }
+
   } catch (err) {
     const e = { message: "Error storing order", cause: err };
     console.error(e);

@@ -1,15 +1,15 @@
 const chalk = require("chalk");
 const { v4: uuid } = require("uuid");
 const express = require("express");
+const { StatusCodes } = require("http-status-codes");
 // const pino = require("pino");
 // const expressPino = require("express-pino-logger");
-const { StatusCodes } = require("http-status-codes");
 
 const app = express();
 app.use(express.json());
 
 // const log = pino({ level: process.env.LOG_LEVEL || "info", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
-console.info(chalk.bold.magenta("Order Service starting..."));
+console.log(chalk.bold.magenta("Order Service starting..."));
 
 // const expressLogger = expressPino({ logger: log });
 // app.use(expressLogger);
@@ -26,34 +26,40 @@ app.use((req, res, next) => {
 });
 
 const validateOrder = order => {
-  console.dir(order);    
+  // console.log(order);
   const errors = [];
   if (!order.customerId) {
     errors.push("Customer is required");
   }
 
-  if (!order.user) {
+  if (!order?.user) {
     errors.push("Email is required");
   }
 
-  if (!order.items.length > 0) {
+  if (!order.items?.length > 0) {
     errors.push("Items is required");
   }
 
   return errors;
 };
 
-app.post("/validate", (req, res) => {
-  console.log(chalk.magenta("Validating order..."));
-  const errors = validateOrder(req.body.payload.data);
-  console.log(errors.length === 0 ? chalk.green("Order is valid") : chalk.red(`Order is invalid with ${errors.length} errors | ${JSON.stringify(errors)}`));
-  if (errors.length === 0) return res.status(StatusCodes.OK).send(req.body);
-  return res.status(StatusCodes.BAD_REQUEST).send(errors);
+app.post("/submitted", (req, res) => {
+  console.log(chalk.magenta("Creating order..."));
+  return res.send({ ...req.body, orderId: uuid() });
 });
 
-app.post("/create", (req, res) => {
-  console.log(chalk.magenta("Creating order..."));
-  return res.send({ ...req.body, orderId: uuid(), status: "new" });
+app.post("/validate", (req, res) => {
+  console.log(chalk.magenta("Validating order..."));
+  // const errors = validateOrder(req.body.payload.data);
+  const errors = [];
+  console.log(errors.length === 0 ? chalk.green("Order is valid") : chalk.red(`Order is invalid with ${errors.length} errors | ${JSON.stringify(errors)}`));
+  if (errors.length === 0) return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(errors);
+});
+
+app.post("/authorise", (req, res) => {
+  console.log(chalk.magenta("Authorising order..."));
+  return res.send({ ...req.body, orderId: uuid() });
 });
 
 app.post("/fulfil", (req, res) => {
@@ -96,4 +102,4 @@ app.post("/approve", (req, res) => {
 });
 
 app.listen(80);
-console.info(chalk.bold.magenta("Order Service ready"));
+console.log(chalk.bold.magenta("Order Service ready"));
