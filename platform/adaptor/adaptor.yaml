@@ -15,13 +15,14 @@ data:
     order.ship.1|contexts-orders.order.ship|order.shipped.1|order.shipment-failed.1
     order.delivered.1|contexts-orders.order.delivered|order.close.1|order.deliverey-failed.1
     order.cancelled.1|contexts-orders.order.cancel|order.cancelled.1|order.cancellation-failed.1
-    order.created.1|+api.order.received|-|-
-    order.creationFailed.1|+api.order.resend|-|-
-    order.validated.1|+api.order.valid|-|-
-    order.invalid.1|+api.order.invalid|-|-
-    order.authorised.1|+api.order.authorised|-|-
-    order.shipped.1|+api.order.shipped|-|-
-    order.cancelled.1|+api.order.cancelled|-|-
+    order.created.1|+api.orders.received|-|-
+    order.creationFailed.1|+api.orders.resend|-|-
+    order.validated.1|+api.orders.valid|-|-
+    order.invalid.1|+api.orders.invalid|-|-
+    order.authorised.1|+api.orders.authorised|-|-
+    order.unauthorised.1|+api.orders.unauthorised|-|-
+    order.shipped.1|+api.orders.shipped|-|-
+    order.cancelled.1|+api.orders.cancelled|-|-
 ---
 apiVersion: apps/v1
 kind: Deployment

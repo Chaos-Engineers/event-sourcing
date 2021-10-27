@@ -108,8 +108,7 @@ const ${handler.endpoint} = event => \{
     status: StatusCodes.OK,
     result: "Not implemented"
   };
-}
-`)
+}`)
       );
     });
 
@@ -150,19 +149,16 @@ const joinAndSubscribe = async () => {
     try {
       const element = payloads[0];
       const payload = JSON.parse(element.payload.event);
-      let prevResult = null;
 
       for (const mapping of eventServiceMap[payload.type]) {
         console.dir({ Mapping: mapping });
         console.info(chalk`Handling {green ${mapping.source}} by calling {cyan ${mapping.url}}`);
         try {
-          const { body: result, statusCode } = mapping.put //
-            ? await got.put(mapping.url, { json: { payload } })
-            : await got.post(mapping.url, { json: { payload: payload } });
+          const result = mapping.put //
+            ? await got.put(mapping.url, { json: { ...payload.data } }).json()
+            : await got.post(mapping.url, { json: { ...payload.data } }).json();
 
-          console.info(chalk`Status {green ${statusCode}}`);
-
-          if ((statusCode === 200 || statusCode === 201) && mapping.output !== "-") {
+          if (mapping.output !== "-") {
             const id = uuid();
             console.info(chalk`Publishing {green event} to bus ({cyan id: ${id}})`);
 
@@ -172,24 +168,19 @@ const joinAndSubscribe = async () => {
               type: mapping.output,
               ctx: payload.ctx || id,
               time: Date.now(),
-              data: { ...result },
-              prevData: JSON.stringify(prevResult)
+              data: result
             };
 
             await broker.publish({ event: JSON.stringify(event) });
-            prevResult = result;
-          } else if (statusCode === 422) {
-            if (mapping.error) {
-              console.info(chalk`Sending {red err} response to url: {cyan ${mapping.error}}`);
-
-              await got.post(mapping.error, { json: { payload, result, statusCode } });
-            } else {
-              console.error(chalk.red(`Unhandled Error sending event to ${mapping.url} : Response ${statusCode}`));
-            }
           }
         } catch (err) {
-          console.log(chalk.red(`Error A1`));
-          console.dir(err);
+          if (mapping.error) {
+            console.info(chalk`Sending {red ${err}} response to url: {cyan ${mapping.error}}`);
+
+            await got.post(mapping.error, { json: { payload: payload.data, result } });
+          } else {
+            console.error(chalk.red(`Unhandled Error sending event to ${mapping.url} : Response: ${result}`));
+          }
         }
       }
 

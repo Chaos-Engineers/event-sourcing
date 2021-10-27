@@ -45,11 +45,13 @@ const validateOrder = order => {
 
 app.post("/submitted", (req, res) => {
   console.log(chalk.magenta("Creating order..."));
-  return res.send({ ...req.body, orderId: uuid() });
+  console.log(req.body);
+  return res.status(StatusCodes.OK).send(JSON.stringify(req.body));
 });
 
 app.post("/validate", (req, res) => {
   console.log(chalk.magenta("Validating order..."));
+  console.log(req.body);
   // const errors = validateOrder(req.body.payload.data);
   const errors = [];
   console.log(errors.length === 0 ? chalk.green("Order is valid") : chalk.red(`Order is invalid with ${errors.length} errors | ${JSON.stringify(errors)}`));
@@ -59,47 +61,34 @@ app.post("/validate", (req, res) => {
 
 app.post("/authorise", (req, res) => {
   console.log(chalk.magenta("Authorising order..."));
-  return res.send({ ...req.body, orderId: uuid() });
+  return res.status(StatusCodes.OK).send(req.body);
 });
 
 app.post("/fulfil", (req, res) => {
   console.log(chalk.magenta("Fulfilling order..."));
-  const order = req.body;
-  return res.send({ ...req.body, status: "fulfilled", consignments: { count: 3, shipped: 0, received: 0 } });
+  return res.status(StatusCodes.OK).send(req.body);
 });
 
 app.post("/ship", (req, res) => {
   console.log(chalk.magenta("Shipping order..."));
-  const order = req.body;
-  if (order.consignments.shipped < order.consignments.count)
-    return {
-      ...order,
-      status: "shipping",
-      consignments: { ...consignments, ship: order.consignments.ship + 1 }
-    };
-  return res.send({ ...order, status: `shipped`, shipConsignment: -1 });
+  return res.status(StatusCodes.OK).send(req.body);
 });
 
 app.post("/receive", (req, res) => {
   console.log(chalk.magenta("Receiving order..."));
-  const order = req.body;
-  if (order.received_consignments < order.consignments) return { ...order, status: "received_consignment", consignments: { ...consignments, received: order.consignments.received + 1 } };
-  return res.send({ ...req.body, status: "received" });
+  return res.status(StatusCodes.OK).send(req.body);
 });
 
 app.post("/cancel", (req, res) => {
   console.log(chalk.magenta("Cancelling order..."));
-  const order = req.body;
-  if (order.consignments.ship > 0) {
-    res.status(StatusCodes.CONFLICT).send({ ...order, status: "aborting cancellation", notes: "Cannot cancel as part of order has been shipped" });
-  }
-  return res.send({ ...req.body, status: "cancelled" });
+  return res.status(StatusCodes.OK).send(req.body);
 });
 
 app.post("/approve", (req, res) => {
   console.log(chalk.magenta("Approving order..."));
-  return res.send({ ...req.body, status: "approved" });
+  return res.status(StatusCodes.OK).send(req.body);
 });
 
 app.listen(80);
 console.log(chalk.bold.magenta("Order Service ready"));
+

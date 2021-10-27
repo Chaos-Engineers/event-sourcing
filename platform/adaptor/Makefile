@@ -2,7 +2,7 @@
 
 install: build release redis-secret deploy
 
-cycle: down delete build release deploy dev
+cycle: down delete build release deploy
 
 build:
 	@echo "\033[0;32mBuilding adaptor\033[0m"

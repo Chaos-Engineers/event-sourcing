@@ -4,18 +4,13 @@ const { MongoClient } = require("mongodb");
 const Redis = require("ioredis");
 const brokerType = require("redis-streams-broker").StreamChannelBroker;
 const express = require("express");
-// const pino = require("pino");
-// const expressPino = require("express-pino-logger");
 const { StatusCodes: sc } = require("http-status-codes");
 
 const app = express();
 app.use(express.json());
-// const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
 
 console.info(chalk.bold.magenta("Orders API starting..."));
 
-// const expressLogger = expressPino({ logger: log });
-// app.use(expressLogger);
 app.disable("x-powered-by");
 
 let broker = null;
@@ -48,40 +43,84 @@ app.get("/", async (req, res) => {
 });
 
 app.put("/received", async (req, res) => {
-  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Received", "data.errors": null } });
-  res.sendStatus(sc.OK);
+  console.log(chalk.green("Order received"));
+  const order = req.body;
+  console.dir(JSON.stringify(order));
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Validating" } });
+  res.status(sc.OK).send({});
 });
 
 app.put("/resend", async (req, res) => {
-  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Resend", "data.errors": res.body } });
-  res.sendStatus(sc.OK);
+  console.log(chalk.green("Order resend"));
+  const order = req.body;
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Resend", "data.errors": res.body } });
+  res.status(sc.OK).send({});
 });
 
 app.put("/valid", async (req, res) => {
-  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Valid", "data.errors": null } });
-  res.sendStatus(sc.OK);
+  console.log(chalk.green("Order valid"));
+  const order = req.body;
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Valid", "data.errors": null } });
+  res.status(sc.OK).send({});
 });
 
 app.put("/invalid", async (req, res) => {
-  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Invalid", "data.errors": req.body } });
-  res.sendStatus(sc.OK);
+  console.log(chalk.green("Order invalid"));
+  const order = req.body;
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Invalid", "data.errors": req.body } });
+  res.status(sc.OK).send({});
 });
 
 app.put("/authorised", async (req, res) => {
-  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Authorised", "data.errors": null } });
-  res.sendStatus(sc.OK);
+  console.log(chalk.green("Order authorised"));
+  const order = req.body;
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Authorised", "data.errors": null } });
+  res.status(sc.OK).send({});
 });
 
 app.put("/unauthorised", async (req, res) => {
-  await ordersCollection.updateOne({ _id: id }, { $set: { "data.status": "Unauthorised", "data.errors": req.body } });
-  res.sendStatus(sc.OK);
+  console.log(chalk.green("Order unauthorised"));
+  const order = req.body;
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Unauthorised", "data.errors": req.body } });
+  res.status(sc.OK).send({});
+});
+
+app.put("/shipped", async (req, res) => {
+  console.log(chalk.green("Order shipped"));
+  const order = req.body;
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Shipped", "data.errors": null } });
+  res.status(sc.OK).send({});
+});
+
+app.put("/cancelled", async (req, res) => {
+  console.log(chalk.green("Order cancelled"));
+  const order = req.body;
+
+  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Cancelled", "data.errors": req.body } });
+  res.status(sc.OK).send({});
 });
 
 app.post("/", async (req, res) => {
+  console.log(chalk.green("Order submitted"));
   const body = req.body;
   console.dir(body);
   const id = uuid();
   const timestamp = `${Date.now()}`;
+
+  const order = {
+    id: id,
+    customerId: body.customerId,
+    items: body.items,
+    address: body.address,
+    purchaseOrder: body.po,
+    quotedPrice: body.price,
+    quotedCurrency: body.currency,
+    quotedDeliveryDate: body.deliveryDate,
+    time: timestamp,
+    status: "Submitting",
+    user: body.username,
+    errors: []
+  };
 
   const event = {
     id: id,
@@ -90,24 +129,12 @@ app.post("/", async (req, res) => {
     event: "order.submitted.1",
     ctx: body.ctx || uuid(),
     time: timestamp,
-    data: {
-      customerId: body.customerId,
-      items: body.items,
-      address: body.address,
-      purchaseOrder: body.po,
-      quotedPrice: body.price,
-      quotedCurrency: body.currency,
-      quotedDeliveryDate: body.deliveryDate,
-      time: timestamp,
-      status: "Submitting",
-      user: body.username,
-      errors: []
-    }
+    data: order
   };
 
   try {
     console.dir({ action: "Storing order", event });
-    await ordersCollection.insertOne({ _id: event.id, ...event.data });
+    await ordersCollection.insertOne({ _id: event.data.id, ...event.data });
 
     try {
       await broker.publish({ event: JSON.stringify(event) });
@@ -116,7 +143,6 @@ app.post("/", async (req, res) => {
       console.error({ message: "Error publishing event", cause: err });
       res.status(sc.INTERNAL_SERVER_ERROR).send(JSON.stringify({ message: "Couldn't publish event", cause: err }));
     }
-
   } catch (err) {
     const e = { message: "Error storing order", cause: err };
     console.error(e);
@@ -166,3 +192,4 @@ connectToMongo();
 
 app.listen(80);
 console.info(chalk.bold.magenta("Orders API ready"));
+
