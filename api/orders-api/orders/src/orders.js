@@ -9,7 +9,7 @@ const { StatusCodes: sc } = require("http-status-codes");
 const app = express();
 app.use(express.json());
 
-console.info(chalk.bold.magenta("Orders API starting..."));
+console.info(chalk.bold.magenta("Orders API starting"));
 
 app.disable("x-powered-by");
 

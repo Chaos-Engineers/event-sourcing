@@ -1,4 +1,6 @@
-.PHONY:  cycle _cycle up down platform default services api ui
+.PHONY:  cycle _cycle infra down platform default services api ui
+
+all: infra platform services api
 
 default: up platform
 
@@ -7,7 +9,7 @@ cycle: _cycle platform
 _cycle:
 	@make -C infra/cluster cycle
 
-up:
+infra:
 	@make -C infra/cluster up
 
 down:

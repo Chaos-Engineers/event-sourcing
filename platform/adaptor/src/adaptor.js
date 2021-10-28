@@ -156,7 +156,7 @@ const joinAndSubscribe = async () => {
         try {
           const result = mapping.put //
             ? await got.put(mapping.url, { json: { ...payload.data } }).json()
-            : await got.post(mapping.url, { json: { ...payload.data } }).json();
+            : await got.post(mapping.url, { json: { ...payload.dataa } }).json();
 
           if (mapping.output !== "-") {
             const id = uuid();

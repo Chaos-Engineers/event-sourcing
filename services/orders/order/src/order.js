@@ -2,17 +2,12 @@ const chalk = require("chalk");
 const { v4: uuid } = require("uuid");
 const express = require("express");
 const { StatusCodes } = require("http-status-codes");
-// const pino = require("pino");
-// const expressPino = require("express-pino-logger");
 
 const app = express();
 app.use(express.json());
 
-// const log = pino({ level: process.env.LOG_LEVEL || "info", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
 console.log(chalk.bold.magenta("Order Service starting..."));
 
-// const expressLogger = expressPino({ logger: log });
-// app.use(expressLogger);
 app.disable("x-powered-by");
 
 app.use((req, res, next) => {
@@ -50,7 +45,7 @@ app.post("/submitted", (req, res) => {
 });
 
 app.post("/validate", (req, res) => {
-  console.log(chalk.magenta("Validating order..."));
+  console.log(chalk.magenta("Validating order"));
   console.log(req.body);
   // const errors = validateOrder(req.body.payload.data);
   const errors = [];
