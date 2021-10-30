@@ -1,3 +1,5 @@
+.PHONY: install delete 
+
 install:
 	@make -C context install
 	@make -C orders-api install
