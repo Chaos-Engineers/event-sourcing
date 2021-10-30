@@ -22,12 +22,10 @@ services:
 	@make -C services/orders install
 
 api:
-	@make -C api/context install
-	@make -C api/orders-api install
+	@make -C api install
 
 ui:
-	@make -C ui/context install
-	@make -C ui/ui install
+	@make -C ui install
 	
 lsi:
 	@curl -s http://localhost:5000/v2/_catalog | jq '.repositories'

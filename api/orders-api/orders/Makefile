@@ -33,7 +33,7 @@ deploy:
 	@kubectl wait $$(kubectl get pods -o name -n api | grep -i orders) --for=condition=ready --timeout=30s -n api
 
 delete:
-	@kubectl delete -f orders.yaml&
+	@kubectl delete -f orders.yaml
 
 logs:
 	@kubectl logs -n api $$(kubectl get pods -n api -o name | grep -i orders | head -n 1 | cut -d'/' -f2) | jq -C '.' | sed 's/\\n/\n/g; s/\\t/\t/g'
