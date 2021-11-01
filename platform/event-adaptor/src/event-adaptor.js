@@ -39,91 +39,50 @@ console.log(chalk.bold.magenta("${name} starting..."));
 `;
 const log = pino({ level: process.env.LOG_LEVEL || "debug", redact: ["password", "newPassword", "req.headers.authorization"], censor: ["**secret**"] });
 
-console.info(chalk.bold.magentaBright("Adaptor Starting..."));
+console.info(chalk.bold.magentaBright("Event Adaptor Starting..."));
 
-const eventServiceMap = {};
+const eventEndpointMap = {};
 let consumerGroup = null;
 let subscriptionHandle = null;
 
 const readAndProcessEventMappings = () => {
-  const eventServiceEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-service-event"), "utf8");
+  const eventEndpointEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-endpoint-event"), "utf8");
 
-  eventServiceEventRaw.split("\n").forEach(line => {
+  eventEndpointEventRaw.split("\n").forEach(line => {
     if (line.indexOf("|") === -1) return;
     let [input, svc, output, error] = line.split("|");
     input = input.trim();
     svc = svc.trim();
-    output = output.trim();
-    error = error.trim();
-    const [_namespace, service, endpoint] = svc.split(".");
-    const namespace = _namespace.startsWith("+") ? _namespace.substring(1) : _namespace;
-    const src = `${service}.${namespace}/${endpoint || ""}`;
-    const source = src.endsWith("/") ? src.substring(0, src.length - 1) : src;
-    if (!eventServiceMap.hasOwnProperty(input)) eventServiceMap[input] = [];
-    eventServiceMap[input].push({
-      source,
-      url: `http://${service}.${namespace}.svc.cluster.local/${endpoint || input}`,
-      output,
-      put: _namespace.startsWith("+"),
-      error,
-      namespace: (_namespace.startsWith("+") ? _namespace.substring(1) : _namespace).replace("contexts-", "services/"),
-      service,
+    const endpoint = svc.startsWith("+") && svc.length > 1 ? svc.substring(1) : svc;
+    if (!eventEndpointMap.hasOwnProperty(input)) eventEndpointMap[input] = [];
+    eventEndpointMap[input].push({
+      source: process.env.SERVICE,
+      url: `http://localhost/${endpoint || input}`,
+      output: output.trim(),
+      put: svc.startsWith("+"),
+      error: error.trim(),
       endpoint
     });
   });
 
-  const serviceEndpointEvent = {};
+  const endpointEvent = {};
 
   console.log(chalk.red("Event Map"));
-  Object.keys(eventServiceMap).forEach(event => {
-    const handlers = eventServiceMap[event];
+  Object.keys(eventEndpointMap).forEach(event => {
+    const handlers = eventEndpointMap[event];
     handlers.forEach(handler => {
       console.log(
-        chalk`{cyan ${event}} -> {red ${handler.namespace.startsWith("contexts") ? "service" : "api"}/${handler.service}.${handler.endpoint}} ${handler.output !== "-" ? "-> " + chalk.green(handler.output) : ""}` //
+        chalk`{cyan ${event}} -> {red ${handler.endpoint}} ${handler.output !== "-" ? "-> " + chalk.green(handler.output) : ""}` //
       );
 
-      if (!serviceEndpointEvent.hasOwnProperty(`${handler.namespace}/${handler.service}`)) serviceEndpointEvent[`${handler.namespace}/${handler.service}`] = [];
-      serviceEndpointEvent[`${handler.namespace}/${handler.service}`].push({
-        endpoint: handler.endpoint,
+      if (!endpointEvent.hasOwnProperty(handler.endpoint)) endpointEvent[handler.endpoint] = [];
+      endpointEvent[handler.endpoint].push({
         output: handler.output,
         error: handler.error,
         put: handler.put
       });
     });
   });
-
-  console.log(chalk.magenta("Code Generation ----------------------------------------------->"));
-
-  Object.keys(serviceEndpointEvent).forEach(service => {
-    console.log(chalk`{blue File:} {red ${service}.js}`);
-    console.log(chalk.cyan("npm i chalk express uuid http-status-codes"));
-    console.log(chalk.blue(headers(service)));
-
-    serviceEndpointEvent[service].forEach(handler => {
-      console.log(
-        chalk.cyan(`
-const ${handler.endpoint} = event => \{
-  \// Business logic for ${handler.endpoint} event handler goes here
-  return {
-    status: StatusCodes.OK,
-    result: "Not implemented"
-  };
-}`)
-      );
-    });
-
-    serviceEndpointEvent[service].forEach(handler => {
-      console.log(
-        chalk.green(`
-app.${handler.put ? "put" : "post"}("/${handler.endpoint}", async (req, res) => \{
-  const handle${handler.endpoint.capitalize()} = ${handler.endpoint}(req.body);
-  return res.status(handle${handler.endpoint.capitalize()}.status).send(\{handle${handler.endpoint.capitalize()}.result});
-});`)
-      );
-    });
-  });
-
-  console.log(chalk.magenta("Code Generation Done ------------------------------------------>"));
 };
 
 const joinAndSubscribe = async () => {
@@ -150,7 +109,7 @@ const joinAndSubscribe = async () => {
       const element = payloads[0];
       const payload = JSON.parse(element.payload.event);
 
-      for (const mapping of eventServiceMap[payload.type]) {
+      for (const mapping of eventEndpointMap[payload.type]) {
         console.dir({ Mapping: mapping });
         console.info(chalk`Handling {green ${mapping.source}} by calling {cyan ${mapping.url}}`);
         try {
@@ -205,4 +164,4 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-console.info(chalk.bold.magenta(`Adaptor ready`));
+console.info(chalk.bold.magenta(`Event Adaptor ready`));

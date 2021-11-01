@@ -1,4 +1,22 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+  namespace: contexts-orders
+data:
+  service: orders
+  redis-url: redis-master.platform.svc.cluster.local
+  event-endpoint-event: |
+    order.submitted.1  | submitted | order.created.1    | order.creation-failed.1
+    order.created.1    | validate  | order.validated.1  | order.invalid.1
+    order.changed.1    | validate  | order.validated.1  | order.invalid.1
+    order.validated.1  | authorise | order.authorised.1 | order.unauthorised.1
+    order.authorised.1 | fulfil    | order.ship.1       | order.fulfillment-failed.1
+    order.ship.1|ship  | ship      | order.shipped.1    | order.shipment-failed.1
+    order.delivered.1  | deliver   | order.close.1      | order.deliverey-failed.1
+    order.cancelled.1  | cancel    | order.cancelled.1  | order.cancellation-failed.1
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +24,7 @@ metadata:
   namespace: contexts-orders
   labels:
     app: order
-    type: api
+    type: service
 spec:
   replicas: 1
   selector:
@@ -17,6 +35,13 @@ spec:
       labels:
         app: order
     spec:
+      volumes:
+        - name: registry
+          configMap:
+            name: config
+            items:
+              - key: event-endpoint-event
+                path: "event-endpoint-event"
       containers:
       - name: order
         image: registry.labs:5000/labs/order
@@ -24,8 +49,31 @@ spec:
         - containerPort: 80
         resources:
           limits:
-            memory: "256Mi"
-            cpu: "500m"
+            memory: "128Mi"
+            cpu: "100m"
+      - name: order-adaptor
+        image: registry.labs:5000/labs/event-adaptor
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "100m"
+        volumeMounts:
+          - name: registry
+            mountPath: "/registry"
+            readOnly: true
+        env:
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-password
+                key: password
+          - name: REDIS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: config
+                key: redis-url
 ---
 apiVersion: v1
 kind: Service
@@ -35,7 +83,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: order
+    app: orders
   ports:
     - port: 80
       targetPort: 80

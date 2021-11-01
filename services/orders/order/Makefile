@@ -3,12 +3,12 @@ default: build release
 dev:
 	@okteto up -n contexts-orders
 
-down:
+kill-dev:
 	@okteto down -n contexts-orders
 
 cycle: down delete install dev
 
-install: build release deploy
+install: build release redis-secret deploy
 
 build:
 	@echo "\033[0;32mBuilding order\033[0m"
@@ -25,6 +25,10 @@ deploy:
 
 delete:
 	@kubectl delete -f order.yaml
+
+redis-secret:
+	@echo "\033[0;32mStoring event-adaptor creds\033[0m"
+	@kubectl create secret generic redis-password -n contexts-orders --from-literal=password=$$(kubectl get secret --namespace platform redis -o jsonpath="{.data.redis-password}" | base64 --decode)
 
 logs:
 	@kubectl logs -n contexts-orders $$(kubectl get pods -n contexts-orders | grep order | head -n 1 | cut -d' '  -f1) | jq

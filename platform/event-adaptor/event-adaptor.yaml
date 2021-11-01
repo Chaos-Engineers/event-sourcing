@@ -27,8 +27,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: adaptor
-  namespace: platform
+  name: event-adaptor
   labels:
     app: adaptor
     type: service

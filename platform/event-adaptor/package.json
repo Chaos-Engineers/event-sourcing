@@ -1,11 +1,11 @@
 {
-    "name": "adaptor",
+    "name": "event-adaptor",
     "version": "1.0.0",
     "description": "",
     "main": "adaptor.js",
     "scripts": {
-        "start": "node src/adaptor.js",
-        "nodemon": "nodemon src/adaptor.js"
+        "start": "node src/event-adaptor.js",
+        "nodemon": "nodemon src/event-adaptor.js"
     },
     "author": "",
     "license": "ISC",
