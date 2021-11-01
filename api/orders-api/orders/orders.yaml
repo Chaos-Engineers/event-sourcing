@@ -5,7 +5,7 @@ metadata:
   name: config
   namespace: api
 data:
-  service: orders
+  service: api.orders
   mongo: db-mongodb.api.svc.cluster.local
   redis-url: redis-master.platform.svc.cluster.local
   event-endpoint-event: |
@@ -44,63 +44,63 @@ spec:
               - key: event-endpoint-event
                 path: "event-endpoint-event"
       containers:
-        - name: orders
-          image: registry.labs:5000/labs/ordersapi
-          ports:
-            - containerPort: 80
-          resources:
-            limits:
-              memory: "128Mi"
-              cpu: "100m"
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: redis-password
-                  key: password
-            - name: MONGO_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: api-db-password
-                  key: password
-            - name: MONGO
-              valueFrom:
-                configMapKeyRef:
-                  name: config
-                  key: mongo
-            - name: REDIS_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: config
-                  key: redis-url
-        - name: order-adaptor
-          image: registry.labs:5000/labs/event-adaptor
-          ports:
-          - containerPort: 80
-          resources:
-            limits:
-              memory: "64Mi"
-              cpu: "100m"
-          volumeMounts:
-            - name: registry
-              mountPath: "/registry"
-              readOnly: true
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: redis-password
-                  key: password
-            - name: REDIS_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: config
-                  key: redis-url
-            - name: SERVICE
-              valueFrom:
-                configMapKeyRef:
-                  name: config
-                  key: service
+      - name: orders
+        image: registry.labs:5000/labs/ordersapi
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-password
+              key: password
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: api-db-password
+              key: password
+        - name: MONGO
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: mongo
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: redis-url
+      - name: order-adaptor
+        image: registry.labs:5000/labs/event-adaptor
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: registry
+          mountPath: "/registry"
+          readOnly: true
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-password
+              key: password
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: redis-url
+        - name: SERVICE
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: service
 ---
 apiVersion: v1
 kind: Service

@@ -7,7 +7,7 @@ install: build release redis-secret db-secret deploy
 dev:
 	@okteto up -n api
 
-down:
+kill-dev:
 	@okteto down -n api
 
 build:

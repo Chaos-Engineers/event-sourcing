@@ -5,7 +5,7 @@ metadata:
   name: config
   namespace: contexts-orders
 data:
-  service: orders
+  service: ctx.orders.orders
   redis-url: redis-master.platform.svc.cluster.local
   event-endpoint-event: |
     order.submitted.1  | submitted | order.created.1    | order.creation-failed.1
