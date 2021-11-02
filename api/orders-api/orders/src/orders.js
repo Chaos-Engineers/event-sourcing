@@ -14,8 +14,7 @@ console.info(chalk.bold.magenta("Orders API starting"));
 app.disable("x-powered-by");
 
 let broker = null;
-const mongoUrl = `mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.MONGO}`;
-const mongo = new MongoClient(mongoUrl);
+const mongo = new MongoClient(`mongodb://root:${process.env.MONGO_PASSWORD}@${process.env.MONGO}`);
 
 let db = null;
 let ordersCollection = null;
@@ -137,6 +136,7 @@ app.post("/", async (req, res) => {
     await ordersCollection.insertOne({ _id: event.data.id, ...event.data });
 
     try {
+      console.log("Publishing order submitted event")
       await broker.publish({ event: JSON.stringify(event) });
       res.sendStatus(sc.CREATED);
     } catch (err) {
@@ -192,4 +192,3 @@ connectToMongo();
 
 app.listen(80);
 console.info(chalk.bold.magenta("Orders API ready"));
-

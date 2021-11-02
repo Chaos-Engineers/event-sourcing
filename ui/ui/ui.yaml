@@ -6,7 +6,7 @@ metadata:
   namespace: ui
   labels:
     app: ui
-    type: api
+    type: ui
 spec:
   replicas: 3
   selector:

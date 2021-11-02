@@ -1,5 +1,7 @@
 .PHONY: build release
 
+all: build release
+
 build:
 	@echo "\033[0;32mBuilding event-adaptor\033[0m"
 	@docker build -t localhost:5000/labs/event-adaptor .

@@ -1,12 +1,20 @@
 default: build release
 
 dev:
-	@okteto up -n contexts-orders
+	@okteto up -n orders-service
 
 kill-dev:
-	@okteto down -n contexts-orders
+	@okteto down -n orders-service
 
-cycle: down delete install dev
+cycle:
+	@kubectl delete -f order.yaml
+	@kubectl apply -f order.yaml
+	@kubectl wait $$(kubectl get pods -o name -n orders-service | grep -i order) --for=condition=ready --timeout=30s -n orders-service
+	@kubectl logs -f -n orders-service $$(kubectl get pods -n orders-service | grep order | grep Running | cut -f1 -d ' ' | xargs) order
+
+ladaptor:
+	@kubectl logs -f -n orders-service $$(kubectl get pods -n orders-service | grep order | grep Running | cut -f1 -d ' ' | xargs) order-adaptor
+	
 
 install: build release redis-secret deploy
 
@@ -21,14 +29,14 @@ release:
 deploy:
 	@kubectl apply -f order.yaml
 	@echo "\033[0;32mWaiting for order pod to be ready\033[0m"
-	@kubectl wait $$(kubectl get pods -o name -n contexts-orders | grep order) --for=condition=ready --timeout=30s -n contexts-orders
+	@kubectl wait $$(kubectl get pods -o name -n orders-service | grep order) --for=condition=ready --timeout=30s -n orders-service
 
 delete:
 	@kubectl delete -f order.yaml
 
 redis-secret:
 	@echo "\033[0;32mStoring event-adaptor creds\033[0m"
-	@kubectl create secret generic redis-password -n contexts-orders --from-literal=password=$$(kubectl get secret --namespace platform redis -o jsonpath="{.data.redis-password}" | base64 --decode)
+	@kubectl create secret generic redis-password -n orders-service --from-literal=password=$$(kubectl get secret --namespace platform redis -o jsonpath="{.data.redis-password}" | base64 --decode)
 
 logs:
-	@kubectl logs -n contexts-orders $$(kubectl get pods -n contexts-orders | grep order | head -n 1 | cut -d' '  -f1) | jq
+	@kubectl logs -n orders-service $$(kubectl get pods -n orders-service | grep order | head -n 1 | cut -d' '  -f1) | jq

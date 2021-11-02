@@ -3,9 +3,9 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config
-  namespace: contexts-orders
+  namespace: orders-service
 data:
-  service: ctx.orders.orders
+  service: orders-service.orders
   redis-url: redis-master.platform.svc.cluster.local
   event-endpoint-event: |
     order.submitted.1  | submitted | order.created.1    | order.creation-failed.1
@@ -21,7 +21,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order 
-  namespace: contexts-orders
+  namespace: orders-service
   labels:
     app: order
     type: service
@@ -34,6 +34,8 @@ spec:
     metadata:
       labels:
         app: order
+        type: service
+        name: orders-service
     spec:
       volumes:
         - name: registry
@@ -74,12 +76,17 @@ spec:
               configMapKeyRef:
                 name: config
                 key: redis-url
+          - name: SERVICE
+            valueFrom:
+              configMapKeyRef:
+                name: config
+                key: service                
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: order
-  namespace: contexts-orders
+  namespace: orders-service
 spec:
   type: ClusterIP
   selector:

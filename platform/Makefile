@@ -4,9 +4,9 @@ install:
 	@make -C context install
 	@make -C ingress install
 	@make -C redis install
-	@make -C adaptor build release redis-secret
+	@make -C event-adaptor build release
 
 delete:
 	@make -C ingress delete
 	@make -C redis delete
-	@make -C adaptor delete
+	@make -C event-adaptor delete
