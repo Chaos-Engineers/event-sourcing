@@ -49,6 +49,7 @@ const readAndProcessEventMappings = () => {
 
 const joinAndSubscribe = async () => {
   console.info(chalk.yellow(`Adaptor connecting to redis...`));
+  console.dir({ port: 6379, host: process.env.REDIS_URL, password: process.env.REDIS_PASSWORD, db: 0, service: process.env.SERVICE });
 
   const redisClient = new Redis({
     port: 6379,

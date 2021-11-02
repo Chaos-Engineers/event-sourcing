@@ -27,6 +27,7 @@ metadata:
     app: orders
     type: api
     name: orders-api
+    sidecar: adaptor
 spec:
   replicas: 1
   selector:
@@ -38,14 +39,14 @@ spec:
         app: orders
     spec:
       volumes:
-        - name: registry
-          configMap:
-            name: config
-            items:
-              - key: event-endpoint-event
-                path: "event-endpoint-event"
+      - name: registry
+        configMap:
+          name: config
+          items:
+            - key: event-endpoint-event
+              path: "event-endpoint-event"
       containers:
-      - name: orders
+      - name: main
         image: registry.labs:5000/labs/ordersapi
         ports:
         - containerPort: 80
@@ -54,54 +55,59 @@ spec:
             memory: "128Mi"
             cpu: "100m"
         env:
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-password
-              key: password
-        - name: MONGO_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: api-db-password
-              key: password
         - name: MONGO
           valueFrom:
             configMapKeyRef:
               name: config
               key: mongo
-        - name: REDIS_URL
-          valueFrom:
-            configMapKeyRef:
-              name: config
-              key: redis-url
-      - name: order-adaptor
-        image: registry.labs:5000/labs/event-adaptor
-        ports:
-        - containerPort: 8080
-        resources:
-          limits:
-            memory: "64Mi"
-            cpu: "100m"
-        volumeMounts:
-        - name: registry
-          mountPath: "/registry"
-          readOnly: true
-        env:
-        - name: REDIS_PASSWORD
+        - name: MONGO_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: redis-password
+              name: api-db-password
               key: password
         - name: REDIS_URL
           valueFrom:
             configMapKeyRef:
               name: config
               key: redis-url
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-password
+              key: password
         - name: SERVICE
           valueFrom:
             configMapKeyRef:
               name: config
               key: service
+      # - name: order-adaptor
+      #   image: registry.labs:5000/labs/event-adaptor
+      #   ports:
+      #   - containerPort: 8080
+      #   resources:
+      #     limits:
+      #       memory: "64Mi"
+      #       cpu: "100m"
+      #   volumeMounts:
+      #   - name: registry
+      #     mountPath: "/registry"
+      #     readOnly: true
+      #   env:
+      #   - name: REDIS_PASSWORD
+      #     valueFrom:
+      #       secretKeyRef:
+      #         name: redis-password
+      #         key: password
+      #   - name: REDIS_URL
+      #     valueFrom:
+      #       configMapKeyRef:
+      #         name: config
+      #         key: redis-url
+      #   - name: SERVICE
+      #     valueFrom:
+      #       configMapKeyRef:
+      #         name: config
+      #         key: service
 ---
 apiVersion: v1
 kind: Service
@@ -113,8 +119,8 @@ spec:
   selector:
     app: orders
   ports:
-    - port: 80
-      targetPort: 80
+  - port: 80
+    targetPort: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -126,12 +132,12 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-    - http:
-        paths:
-          - path: /orders(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: orders
-                port:
-                  number: 80
+  - http:
+      paths:
+      - path: /orders(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: orders
+            port:
+              number: 80

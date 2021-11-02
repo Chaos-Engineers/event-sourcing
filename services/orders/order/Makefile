@@ -10,10 +10,10 @@ cycle:
 	@kubectl delete -f order.yaml
 	@kubectl apply -f order.yaml
 	@kubectl wait $$(kubectl get pods -o name -n orders-service | grep -i order) --for=condition=ready --timeout=30s -n orders-service
-	@kubectl logs -f -n orders-service $$(kubectl get pods -n orders-service | grep order | grep Running | cut -f1 -d ' ' | xargs) order
+	@kubectl logs -f -n orders-service $$(kubectl get pods -n orders-service | grep order | grep Running | cut -f1 -d ' ' | xargs) main
 
 ladaptor:
-	@kubectl logs -f -n orders-service $$(kubectl get pods -n orders-service | grep order | grep Running | cut -f1 -d ' ' | xargs) order-adaptor
+	@kubectl logs -f -n orders-service $$(kubectl get pods -n orders-service | grep order | grep Running | cut -f1 -d ' ' | xargs) adaptor
 	
 
 install: build release redis-secret deploy

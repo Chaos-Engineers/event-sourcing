@@ -4,7 +4,7 @@ cycle:
 	@kubectl delete -f orders.yaml
 	@kubectl apply -f orders.yaml
 	@kubectl wait $$(kubectl get pods -o name -n orders-api | grep -i orders) --for=condition=ready --timeout=30s -n orders-api
-	@kubectl logs -f -n orders-api $$(kubectl get pods -n orders-api | grep orders | grep Running | cut -f1 -d ' ' | xargs) orders
+	@kubectl logs -f -n orders-api $$(kubectl get pods -n orders-api | grep orders | grep Running | cut -f1 -d ' ' | xargs) main
 
 install: build release redis-secret db-secret deploy
 

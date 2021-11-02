@@ -1,87 +1,34 @@
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: apps.kruise.io/v1alpha1
+kind: SidecarSet
 metadata:
-  name: config
-  namespace: platform
-data:
-  redis-url: redis-master.platform.svc.cluster.local
-  event-service-event: |
-    order.submitted.1|contexts-orders.order.submitted|order.created.1|order.creation-failed.1
-    order.created.1|contexts-orders.order.validate|order.validated.1|order.invalid.1
-    order.changed.1|contexts-orders.order.validate|order.validated.1|order.invalid.1
-    order.validated.1|contexts-orders.order.authorise|order.authorised.1|order.unauthorised.1
-    order.authorised.1|contexts-orders.order.fulfil|order.ship.1|order.fulfillment-failed.1
-    order.ship.1|contexts-orders.order.ship|order.shipped.1|order.shipment-failed.1
-    order.delivered.1|contexts-orders.order.delivered|order.close.1|order.deliverey-failed.1
-    order.cancelled.1|contexts-orders.order.cancel|order.cancelled.1|order.cancellation-failed.1
-    order.created.1|+api.orders.received|-|-
-    order.creationFailed.1|+api.orders.resend|-|-
-    order.validated.1|+api.orders.valid|-|-
-    order.invalid.1|+api.orders.invalid|-|-
-    order.authorised.1|+api.orders.authorised|-|-
-    order.unauthorised.1|+api.orders.unauthorised|-|-
-    order.shipped.1|+api.orders.shipped|-|-
-    order.cancelled.1|+api.orders.cancelled|-|-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: event-adaptor
-  labels:
-    app: adaptor
-    type: service
+  name: adaptor-sidecarset
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: adaptor
-  template:
-    metadata:
-      labels:
-        app: adaptor
-    spec:
-      volumes:
+      sidecar: adaptor
+  updateStrategy:
+    type: RollingUpdate
+    maxUnavailable: 1
+  volumes:
+    - name: registry
+      configMap:
+        name: config
+        items:
+          - key: event-endpoint-event
+            path: "event-endpoint-event"
+  containers:
+    - name: adaptor
+      image: registry.labs:5000/labs/event-adaptor:1.0.5
+      transferEnv:
+        - sourceContainerName: main
+          envName: REDIS_URL
+        - sourceContainerName: main
+          envName: REDIS_PASSWORD
+        - sourceContainerName: main
+          envName: SERVICE
+      shareVolumePolicy:
+        type: enabled
+      volumeMounts:
         - name: registry
-          configMap:
-            name: config
-            items:
-              - key: event-service-event
-                path: "event-service-event"
-      containers:
-        - name: adaptor
-          image: registry.labs:5000/labs/redis-rest-adaptor
-          ports:
-            - containerPort: 80
-          resources:
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
-          volumeMounts:
-            - name: registry
-              mountPath: "/registry"
-              readOnly: true
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: redis-password
-                  key: password
-            - name: REDIS_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: config
-                  key: redis-url
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: adaptor
-  namespace: platform
-spec:
-  type: ClusterIP
-  selector:
-    app: adaptor
-  ports:
-    - port: 80
-      targetPort: 80
+          mountPath: "/registry"
+          readOnly: true
