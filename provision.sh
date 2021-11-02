@@ -29,7 +29,7 @@ function Helm {
 function LinuxTools {
   echo "Installing basic GNU/Linux Tools for k8s labs"
   sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt update -qq >/dev/null
-  sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt install -y -qq curl jq make unzip zip vim git tmux >/dev/null
+  sudo -E sh -c DEBIAN_FRONTEND=noninteractive apt install -y -qq curl jq make unzip zip vim git tmux uuid >/dev/null
 
   if [ ! -a ~/.inputrc ]; then echo '$include /etc/inputrc' > ~/.inputrc; fi
 
