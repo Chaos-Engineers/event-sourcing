@@ -1,0 +1,21 @@
+{
+    "name": "adaptor-operator",
+    "version": "1.0.0",
+    "description": "",
+    "main": "adaptor-operator.js",
+    "scripts": {
+        "start": "node src/adaptor-operator.js",
+        "nodemon": "nodemon src/adaptor-operator.js"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "chalk": "^4.1.2",
+        "express": "^4.17.1",
+        "http-status-codes": "^2.1.4",
+        "ioredis": "^4.27.9",
+        "npm": "^8.1.1",
+        "redis-streams-broker": "^0.0.13",
+        "uuid": "^8.3.2"
+    }
+}

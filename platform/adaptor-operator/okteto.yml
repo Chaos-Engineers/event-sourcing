@@ -1,0 +1,11 @@
+name: orders
+image: bryandollery/nodemon
+labels:
+  app: adaptor-operator
+command: ["npm", "run", "nodemon"]
+workdir: /work
+sync:
+- .:/work
+forward:
+- 9228:9229
+- 8081:80
