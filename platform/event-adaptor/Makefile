@@ -1,6 +1,6 @@
 .PHONY: all build release install deploy delete
 
-ver := 1.0.5
+ver := 1.0.6
 all: build release deploy
 
 build:

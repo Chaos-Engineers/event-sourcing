@@ -1,6 +1,7 @@
 const chalk = require("chalk");
 const { v4: uuid } = require("uuid");
 const { MongoClient } = require("mongodb");
+const ObjectID = require("mongodb").ObjectID;
 const Redis = require("ioredis");
 const brokerType = require("redis-streams-broker").StreamChannelBroker;
 const express = require("express");
@@ -41,62 +42,215 @@ app.get("/", async (req, res) => {
   }
 });
 
+app.get("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const order = await ordersCollection.findOne({ _id: new ObjectId(id) });
+    res.send(order);
+  } catch (err) {
+    const e = { message: `Error finding stored order id: ${id}`, cause: err };
+    console.error(e);
+    res.status(sc.INTERNAL_SERVER_ERROR).send(e);
+  }
+});
+
 app.put("/received", async (req, res) => {
   console.log(chalk.green("Order received"));
   const order = req.body;
-  console.dir(JSON.stringify(order));
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Validating" } });
-  res.status(sc.OK).send({});
+  console.dir(order);
+  console.log(chalk.cyan(`Updating order in db: ${order.id}`));
+
+  try {
+    await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Validating" } });
+    console.log("order status changed");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/resend", async (req, res) => {
   console.log(chalk.green("Order resend"));
   const order = req.body;
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Resend", "data.errors": res.body } });
-  res.status(sc.OK).send({});
+
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Resend",
+          data: {
+            errors: res.body
+          }
+        }
+      }
+    );
+
+    console.log("order status changed");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/valid", async (req, res) => {
   console.log(chalk.green("Order valid"));
   const order = req.body;
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Valid", "data.errors": null } });
-  res.status(sc.OK).send({});
+
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Valid",
+          data: {
+            errors: null
+          }
+        }
+      }
+    );
+
+    console.log("order status changed");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/invalid", async (req, res) => {
   console.log(chalk.green("Order invalid"));
   const order = req.body;
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Invalid", "data.errors": req.body } });
-  res.status(sc.OK).send({});
+
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Invalid",
+          data: {
+            errors: res.body
+          }
+        }
+      }
+    );
+
+    console.log("Order status changed");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/authorised", async (req, res) => {
   console.log(chalk.green("Order authorised"));
   const order = req.body;
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Authorised", "data.errors": null } });
-  res.status(sc.OK).send({});
+
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Authorised",
+          data: {
+            errors: null
+          }
+        }
+      }
+    );
+
+    console.log("Order successfully resent");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/unauthorised", async (req, res) => {
-  console.log(chalk.green("Order unauthorised"));
+  console.log(chalk.green("Order valid"));
   const order = req.body;
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Unauthorised", "data.errors": req.body } });
-  res.status(sc.OK).send({});
+
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Unauthorised",
+          data: {
+            errors: req.body
+          }
+        }
+      }
+    );
+
+    console.log("Order successfully resent");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/shipped", async (req, res) => {
   console.log(chalk.green("Order shipped"));
   const order = req.body;
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Shipped", "data.errors": null } });
-  res.status(sc.OK).send({});
+
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Valid",
+          data: {
+            errors: null
+          }
+        }
+      }
+    );
+
+    console.log("Order successfully resent");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.put("/cancelled", async (req, res) => {
-  console.log(chalk.green("Order cancelled"));
+  console.log(chalk.green("Order valid"));
   const order = req.body;
 
-  await ordersCollection.updateOne({ _id: order.id }, { $set: { status: "Cancelled", "data.errors": req.body } });
-  res.status(sc.OK).send({});
+  try {
+    await ordersCollection.updateOne(
+      { _id: order.id },
+      {
+        $set: {
+          status: "Cancelled",
+          data: {
+            errors: req.body
+          }
+        }
+      }
+    );
+
+    console.log("Order successfully resent");
+    res.status(sc.OK).send({ id: order.id });
+  } catch (err) {
+    console.log("Error: Order not saved");
+    console.dir(err);
+    res.status(sc.INTERNAL_SERVER_ERROR).send({ id: order.id, ...err });
+  }
 });
 
 app.post("/", async (req, res) => {
@@ -136,7 +290,7 @@ app.post("/", async (req, res) => {
     await ordersCollection.insertOne({ _id: event.data.id, ...event.data });
 
     try {
-      console.log("Publishing order submitted event")
+      console.log("Publishing order submitted event");
       await broker.publish({ event: JSON.stringify(event) });
       res.sendStatus(sc.CREATED);
     } catch (err) {

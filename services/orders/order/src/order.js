@@ -40,8 +40,8 @@ const validateOrder = order => {
 
 app.post("/submitted", (req, res) => {
   console.log(chalk.magenta("Creating order..."));
-  console.log(req.body);
-  return res.status(StatusCodes.OK).send(JSON.stringify(req.body));
+  console.dir(req.body);
+  return res.status(StatusCodes.OK).send(JSON.stringify({ id: req.body.id }));
 });
 
 app.post("/validate", (req, res) => {
@@ -50,40 +50,39 @@ app.post("/validate", (req, res) => {
   // const errors = validateOrder(req.body.payload.data);
   const errors = [];
   console.log(errors.length === 0 ? chalk.green("Order is valid") : chalk.red(`Order is invalid with ${errors.length} errors | ${JSON.stringify(errors)}`));
-  if (errors.length === 0) return res.status(StatusCodes.OK).send(req.body);
+  if (errors.length === 0) return res.status(StatusCodes.OK).send({ id: req.body.id });
   return res.status(StatusCodes.UNPROCESSABLE_ENTITY).send(errors);
 });
 
 app.post("/authorise", (req, res) => {
   console.log(chalk.magenta("Authorising order..."));
-  return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.OK).send({ id: req.body.id });
 });
 
 app.post("/fulfil", (req, res) => {
   console.log(chalk.magenta("Fulfilling order..."));
-  return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.OK).send({ id: req.body.id });
 });
 
 app.post("/ship", (req, res) => {
   console.log(chalk.magenta("Shipping order..."));
-  return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.OK).send({ id: req.body.id });
 });
 
 app.post("/receive", (req, res) => {
   console.log(chalk.magenta("Receiving order..."));
-  return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.OK).send({ id: req.body.id });
 });
 
 app.post("/cancel", (req, res) => {
   console.log(chalk.magenta("Cancelling order..."));
-  return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.OK).send({ id: req.body.id });
 });
 
 app.post("/approve", (req, res) => {
   console.log(chalk.magenta("Approving order..."));
-  return res.status(StatusCodes.OK).send(req.body);
+  return res.status(StatusCodes.OK).send({ id: req.body.id });
 });
 
 app.listen(80);
 console.log(chalk.bold.magenta("Order Service ready"));
-

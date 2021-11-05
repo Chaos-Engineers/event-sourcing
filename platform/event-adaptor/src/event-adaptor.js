@@ -65,7 +65,7 @@ const joinAndSubscribe = async () => {
   const pollSpanMs = 1; //
   const payloadsToFetch = 1;
   const readPending = true;
-  const consumerGroupName = "order-adaptors";
+  const consumerGroupName = `${process.env.SERVICE}-group`;
 
   console.info(chalk.yellow(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`));
   consumerGroup = await broker.joinConsumerGroup(consumerGroupName);
@@ -86,9 +86,6 @@ const handleEvent = async payloads => {
         : got.post(mapping.url, { json: { ...payload.data } })
       ).json();
 
-      console.log(`Handle Event D`);
-      console.dir(results);
-
       if (mapping.output !== "-") {
         const id = uuid();
         console.info(chalk`Publishing {green event} to bus ({cyan id: ${id}})`);
@@ -99,7 +96,7 @@ const handleEvent = async payloads => {
           type: mapping.output,
           ctx: payload.ctx || id,
           time: Date.now(),
-          data: results
+          data: results || payload.data.id
         };
 
         await broker.publish({ event: JSON.stringify(event) });
