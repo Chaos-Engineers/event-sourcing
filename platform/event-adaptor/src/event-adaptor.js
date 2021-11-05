@@ -8,6 +8,7 @@ const chalk = require("chalk");
 console.info(chalk.bold.magentaBright("Event Adaptor Starting..."));
 
 const eventEndpointMap = {};
+const eventLog = [];
 let consumerGroup = null;
 let subscriptionHandle = null;
 let broker = null;
@@ -62,59 +63,84 @@ const joinAndSubscribe = async () => {
   broker = new brokerType(redisClient, qName);
 
   const adaptorName = `adaptor-${uuid()}`;
-  const pollSpanMs = 1; //
-  const payloadsToFetch = 1;
-  const readPending = true;
   const consumerGroupName = `${process.env.SERVICE}-group`;
 
   console.info(chalk.yellow(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`));
   consumerGroup = await broker.joinConsumerGroup(consumerGroupName);
   console.info(chalk.yellow(`Adaptor subscribing as ${adaptorName}`));
-  subscriptionHandle = await consumerGroup.subscribe(adaptorName, handleEvent, pollSpanMs, payloadsToFetch, readPending);
+  subscriptionHandle = await consumerGroup.subscribe(adaptorName, handleEvent, 1, 1, true);
 };
 
 const handleEvent = async payloads => {
   try {
     const element = payloads[0];
     const payload = JSON.parse(element.payload.event);
-    const mapping = eventEndpointMap[payload.type];
-    console.info(chalk`Handling {green ${mapping.input}} by calling {cyan ${mapping.url}}`);
 
-    try {
-      const results = await (mapping.put //
-        ? got.put(mapping.url, { json: { ...payload.data } })
-        : got.post(mapping.url, { json: { ...payload.data } })
-      ).json();
-
-      if (mapping.output !== "-") {
-        const id = uuid();
-        console.info(chalk`Publishing {green event} to bus ({cyan id: ${id}})`);
-
+    if (payload.type.startsWith("control")) {
+      if (payload.type === "control.map.1") {
         const event = {
-          id: id,
-          source: mapping.source,
-          type: mapping.output,
-          ctx: payload.ctx || id,
+          id: uuid(),
+          source: process.env.SERVICE,
+          type: "report.map.1",
+          ctx: payload.ctx,
           time: Date.now(),
-          data: results || payload.data.id
+          data: eventEndpointMap
+        };
+
+        await broker.publish({ event: JSON.stringify(event) });
+      } else if (payload.type === "control.log.1") {
+        const event = {
+          id: uuid(),
+          source: process.env.SERVICE,
+          type: "report.log.1",
+          ctx: payload.ctx,
+          time: Date.now(),
+          data: eventLog
         };
 
         await broker.publish({ event: JSON.stringify(event) });
       }
-    } catch (err) {
-      console.log("Handle Event E");
-      if (mapping.error) {
-        console.info(chalk`Sending {red ${err}} response to url: {cyan ${mapping.error}}`);
+    } else {
+      const mapping = eventEndpointMap[payload.type];
+      console.info(chalk`Handling {green ${mapping.input}} by calling {cyan ${mapping.url}}`);
+      eventLog.push({ type: payload.type, published: payload.timestamp, received: new Date().toISOString() });
 
-        await got.post(mapping.error, { json: { payload: payload.data, result } });
-      } else {
-        console.error(chalk.red(`Unhandled Error sending event to ${mapping.url} : Response: ${result}`));
+      try {
+        const results = await (mapping.put //
+          ? got.put(mapping.url, { json: { ...payload.data } })
+          : got.post(mapping.url, { json: { ...payload.data } })
+        ).json();
+
+        if (mapping.output !== "-") {
+          const id = uuid();
+          console.info(chalk`Publishing {green event} to bus ({cyan id: ${id}})`);
+
+          const event = {
+            id: id,
+            source: mapping.source,
+            type: mapping.output,
+            ctx: payload.ctx || id,
+            time: Date.now(),
+            data: results || payload.data.id
+          };
+
+          await broker.publish({ event: JSON.stringify(event) });
+        }
+      } catch (err) {
+        console.log("Handle Event E");
+        if (mapping.error) {
+          console.info(chalk`Sending {red ${err}} response to url: {cyan ${mapping.error}}`);
+
+          await got.post(mapping.error, { json: { payload: payload.data, result } });
+        } else {
+          console.error(chalk.red(`Unhandled Error sending event to ${mapping.url} : Response: ${result}`));
+        }
       }
-    }
 
-    await element.markAsRead();
+      await element.markAsRead();
+    }
   } catch (err) {
-    console.log("Handle Event F");
+    console.log("Error: F1");
     console.error(chalk.red(JSON.stringify(err)));
   }
 };

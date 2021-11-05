@@ -43,6 +43,7 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/:id", async (req, res) => {
+  console.log(`Getting a single order`);
   try {
     const id = req.params.id;
     const order = await ordersCollection.findOne({ _id: new ObjectId(id) });
@@ -166,7 +167,7 @@ app.put("/authorised", async (req, res) => {
       }
     );
 
-    console.log("Order successfully resent");
+    console.log("Order status changed");
     res.status(sc.OK).send({ id: order.id });
   } catch (err) {
     console.log("Error: Order not saved");
@@ -192,7 +193,7 @@ app.put("/unauthorised", async (req, res) => {
       }
     );
 
-    console.log("Order successfully resent");
+    console.log("Order status changed");
     res.status(sc.OK).send({ id: order.id });
   } catch (err) {
     console.log("Error: Order not saved");
@@ -218,7 +219,7 @@ app.put("/shipped", async (req, res) => {
       }
     );
 
-    console.log("Order successfully resent");
+    console.log("Order status changed");
     res.status(sc.OK).send({ id: order.id });
   } catch (err) {
     console.log("Error: Order not saved");
@@ -244,7 +245,7 @@ app.put("/cancelled", async (req, res) => {
       }
     );
 
-    console.log("Order successfully resent");
+    console.log("Order status changed");
     res.status(sc.OK).send({ id: order.id });
   } catch (err) {
     console.log("Error: Order not saved");
