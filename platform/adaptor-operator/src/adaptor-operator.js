@@ -90,7 +90,7 @@ const joinAndSubscribe = async () => {
 
   console.info(chalk.yellow(`Adaptor ${adaptorName} joining consumer group: ${consumerGroupName}`));
   consumerGroup = await broker.joinConsumerGroup(consumerGroupName);
-  console.info(chalk.yellow(`Adaptor subscribing as ${adaptorName}`));
+  console.info(chalk.yellow(`Adaptor ${adaptorName} subscribing to ${qName}`));
   subscriptionHandle = await consumerGroup.subscribe(adaptorName, handleEvent, 1, 1, true);
   console.info(chalk.bold.magenta("adaptor-operator API ready"));
 };
