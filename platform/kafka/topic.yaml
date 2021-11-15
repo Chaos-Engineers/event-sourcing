@@ -1,0 +1,9 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: control
+  labels:
+    strimzi.io/cluster: "enterprise-bus"
+spec:
+  partitions: 1
+  replicas: 1

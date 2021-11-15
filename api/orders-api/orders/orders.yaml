@@ -7,7 +7,7 @@ metadata:
 data:
   service: orders-api.orders
   mongo: db-mongodb.orders-api.svc.cluster.local
-  redis-url: redis-master.platform.svc.cluster.local
+  bus-url: enterprise-bus-kafka-0.platform.svc.cluster.local
   event-endpoint-event: |
     order.created.1        | +received     | - | -
     order.creationFailed.1 | +resend       | - | -
@@ -65,16 +65,11 @@ spec:
             secretKeyRef:
               name: api-db-password
               key: password
-        - name: REDIS_URL
+        - name: BUS_URL
           valueFrom:
             configMapKeyRef:
               name: config
-              key: redis-url
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-password
-              key: password
+              key: bus-url
         - name: SERVICE
           valueFrom:
             configMapKeyRef:
@@ -113,3 +108,15 @@ spec:
             name: orders
             port:
               number: 80
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: orders
+  namespace: platform
+  labels:
+    strimzi.io/cluster: "enterprise-bus"
+spec:
+  partitions: 1
+  replicas: 1
+---

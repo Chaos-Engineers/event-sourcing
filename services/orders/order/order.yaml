@@ -83,3 +83,15 @@ spec:
   ports:
   - port: 80
     targetPort: 80
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: orders
+  namespace: platform
+  labels:
+    strimzi.io/cluster: "enterprise-bus"
+spec:
+  partitions: 1
+  replicas: 1
+---

@@ -1,17 +1,13 @@
 const fs = require("fs");
 const got = require("got");
 const { v4: uuid } = require("uuid");
-const Redis = require("ioredis");
-const brokerType = require("redis-streams-broker").StreamChannelBroker;
 const chalk = require("chalk");
+const { Kafka } = require("kafkajs");
 
 console.info(chalk.bold.magentaBright("Event Adaptor Starting..."));
 
 const eventEndpointMap = {};
 const eventLog = [];
-let consumerGroup = null;
-let subscriptionHandle = null;
-let broker = null;
 
 const readAndProcessEventMappings = () => {
   const eventEndpointEventRaw = fs.readFileSync(fs.realpathSync("/registry/event-endpoint-event"), "utf8");
@@ -51,6 +47,11 @@ const readAndProcessEventMappings = () => {
 const joinAndSubscribe = async () => {
   console.info(chalk.yellow(`Adaptor connecting to redis...`));
   console.dir({ port: 6379, host: process.env.REDIS_URL, password: process.env.REDIS_PASSWORD, db: 0, service: process.env.SERVICE });
+
+  const kafka = new Kafka({
+    clientId: `${process.env.SERVICE}-${uuid()}`,
+    brokers: ["kafka1:9092"]
+  });
 
   const redisClient = new Redis({
     port: 6379,
